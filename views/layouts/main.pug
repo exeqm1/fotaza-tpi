@@ -1,0 +1,33 @@
+doctype html
+html(lang="es")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Fotaza | Tu Galería de Fotos Monetizad
+    link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/dist/css/bootstrap.min.css")
+    link(rel="stylesheet" href="/css/styles.css")
+  
+  body.bg-light.d-flex.flex-column.min-vh-100
+
+    nav.navbar.navbar-expand-lg.navbar-dark.bg-dark.shadow-sm
+      .container
+        a.navbar-brand.fw-bold(href="/") 📸 Fotaza
+        button.navbar-toggler(type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav")
+          span.navbar-toggler-icon
+        .collapse.navbar-collapse#navbarNav
+          ul.navbar-nav.ms-auto
+            li.nav-item
+              a.nav-link(href="/") Inicio
+            li.nav-item
+              a.nav-link(href="/posts") Explorar
+            li.nav-item
+              a.nav-link(href="/login") Ingresar
+
+    main.container.my-5.flex-grow-1
+      block content
+
+    footer.bg-dark.text-light.text-center.py-3.mt-auto
+      .container
+        p.mb-0.small &copy; #{new Date().getFullYear()} Fotaza - Trabajo Práctico Integrador ULP.
+    
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/dist/js/bootstrap.bundle.min.js")

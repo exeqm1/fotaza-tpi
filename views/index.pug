@@ -1,0 +1,13 @@
+extends layouts/main
+
+block content
+  .row.justify-content-center.align-items-center.py-5
+    .col-md-8.text-center
+      h1.display-4.fw-bold.text-dark ¡Bienvenido a Fotaza!
+      p.lead.text-secondary La plataforma donde tus fotografías tienen valor real. Subí tus capturas, ganá reputación y monetizá tu contenido de forma segura.
+      hr.my-4
+      p.small.text-muted Sistema de moderación por strikes y billetera virtual integrada.
+      
+      .d-grid.gap-3.d-sm-flex.justify-content-sm-center.mt-4
+        a.btn.btn-primary.btn-lg.px-4.gap-3(href="/register") Crear Cuenta
+        a.btn.btn-outline-secondary.btn-lg.px-4(href="/posts") Ver Fotos Públicas
