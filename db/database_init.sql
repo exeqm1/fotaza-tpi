@@ -1,37 +1,128 @@
 CREATE DATABASE IF NOT EXISTS fotaza_db;
 USE fotaza_db;
 
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS Users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    role ENUM('USER', 'VALIDATOR', 'ADMIN') DEFAULT 'USER',
-    status ENUM('ACTIVE', 'INACTIVE', 'BANNED') DEFAULT 'ACTIVE',
+    password VARCHAR(50) NOT NULL,
+    role ENUM('USER', 'VALIDATOR', 'ADMIN') NOT NULL,
+    status ENUM('ACTIVE', 'INACTIVE', 'BANNED') NOT NULL,
     avatar_path VARCHAR(255),
-    bio_description VARCHAR(255),
-    wallet_balance DECIMAL(10, 2) DEFAULT 0.00,
-    strikes TINYINT DEFAULT 0,
+    bio_description VARCHAR(100),
+    wallet_balance DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    strikes TINYINT NOT NULL DEFAULT 0
 );
 
-CREATE TABLE IF NOT EXISTS posts (
+CREATE TABLE IF NOT EXISTS Tags (
+    tag_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS Posts (
     post_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     title VARCHAR(50) NOT NULL,
     description_text VARCHAR(255),
-    allow_comments BOOLEAN DEFAULT TRUE,
-    post_status ENUM('ACTIVE', 'INACTIVE') DEFAULT 'ACTIVE',
-    for_sale BOOLEAN DEFAULT FALSE,
-    is_locked BOOLEAN DEFAULT FALSE,
-    price DECIMAL(10, 2) DEFAULT 0.00,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    allow_comments BOOLEAN NOT NULL DEFAULT TRUE,
+    post_status ENUM('ACTIVE', 'INACTIVE') NOT NULL,
+    for_sale BOOLEAN NOT NULL DEFAULT FALSE,
+    is_locked BOOLEAN NOT NULL DEFAULT FALSE,
+    price DECIMAL(10, 2),
+    date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS collections (
+CREATE TABLE IF NOT EXISTS Image (
+    image_id INT AUTO_INCREMENT PRIMARY KEY,
+    post_id INT NOT NULL,
+    title VARCHAR(50) NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    license_type ENUM('COPYRIGHT', 'PUBLIC_DOMAIN') NOT NULL,
+    average_rating FLOAT DEFAULT 0,
+    watermark_text VARCHAR(50),
+    FOREIGN KEY (post_id) REFERENCES Posts(post_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Comments (
+    comment_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    post_id INT NOT NULL,
+    content VARCHAR(100) NOT NULL,
+    date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (post_id) REFERENCES Posts(post_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Collections (
     collection_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     title VARCHAR(50) NOT NULL,
+    public BOOLEAN NOT NULL DEFAULT TRUE,
+    date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
 
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS Post_Tags (
+    post_id INT NOT NULL,
+    tag_id INT NOT NULL,
+    PRIMARY KEY (post_id, tag_id),
+    FOREIGN KEY (post_id) REFERENCES Posts(post_id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES Tags(tag_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Collections_Post (
+    collection_id INT NOT NULL,
+    post_id INT NOT NULL,
+    PRIMARY KEY (collection_id, post_id),
+    FOREIGN KEY (collection_id) REFERENCES Collections(collection_id) ON DELETE CASCADE,
+    FOREIGN KEY (post_id) REFERENCES Posts(post_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Ratings (
+    rating_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    post_id INT NOT NULL,
+    value INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (post_id) REFERENCES Posts(post_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Purchases (
+    purchase_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    post_id INT NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id),
+    FOREIGN KEY (post_id) REFERENCES Posts(post_id)
+);
+
+CREATE TABLE IF NOT EXISTS Reports (
+    report_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    comment_id INT DEFAULT NULL,
+    post_id INT DEFAULT NULL,
+    reason VARCHAR(100) NOT NULL,
+    status ENUM('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+    content_type ENUM('POST', 'COMMENT') NOT NULL,
+    date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id),
+    FOREIGN KEY (comment_id) REFERENCES Comments(comment_id) ON DELETE SET NULL,
+    FOREIGN KEY (post_id) REFERENCES Posts(post_id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS User_Follows (
+    follows_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    user_target_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_target_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Notifications (
+    notification_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    type ENUM('COMMENT', 'RATE', 'LIKE', 'FOLLOW', 'PURCHASE') NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
 );
