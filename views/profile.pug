@@ -1,0 +1,46 @@
+extends layouts/main.pug
+
+block content
+  .container(style="max-width: 930px;")
+    
+    .row.mb-5.align-items-center
+      .col-12.col-md-4.text-center.mb-4.mb-md-0
+        img.rounded-circle.img-fluid(src="https://i.pravatar.cc/150?u=fotaza" alt="Avatar" style="width: 150px; height: 150px; object-fit: cover; border: 3px solid var(--accent); padding: 3px;")
+      
+      .col-12.col-md-8
+        .d-flex.align-items-center.mb-3.flex-wrap.gap-3
+          h2.fw-bold.mb-0 Usuario123
+          button.btn.btn-sm.px-3.fw-bold(style="background-color: var(--text-main); color: var(--bg-main); border-radius: 8px;") Seguir
+          button.btn.btn-sm.btn-outline-secondary.border-0.fs-5 ⚙️
+        
+        .d-flex.gap-4.mb-3
+          div
+            span.fw-bold.fs-5 12
+            |  publicaciones
+          div
+            span.fw-bold.fs-5 340
+            |  seguidores
+          div
+            span.fw-bold.fs-5 180
+            |  seguidos
+            
+        div
+          p.fw-bold.mb-1 Nombre Real
+          p.mb-0 Fotógrafo amateur 📸 | Capturando momentos alrededor del mundo.
+          a.text-decoration-none.fw-bold(href="#" style="color: var(--accent);") linktr.ee/usuario123
+
+    ul.nav.nav-tabs.justify-content-center.mb-4.border-bottom-0(style="border-top: 1px solid var(--border-light);")
+      li.nav-item
+        a.nav-link.active.bg-transparent.border-0.border-top.border-2.rounded-0.fw-bold.py-3(href="#" style="color: var(--text-main) !important; border-top-color: var(--text-main) !important;") 
+          i.bi.bi-grid-3x3.me-2
+          | PUBLICACIONES
+      li.nav-item
+        a.nav-link.border-0.text-muted.py-3(href="#") 
+          i.bi.bi-bookmark.me-2
+          | COLECCIONES
+
+    .row.g-1
+      each val in [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        .col-4
+          a.ratio.ratio-1x1.d-block(href="#")
+            img.object-fit-cover(src=`https://picsum.photos/seed/${val * 25}/500/500` alt=`Post ${val}` style="transition: opacity 0.3s ease;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1")

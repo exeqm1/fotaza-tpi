@@ -1,0 +1,96 @@
+:root {
+  --bg-main: #13111C;
+  --bg-surface: #1C1929;
+  --text-main: rgb(226, 232, 240);
+  --text-muted: #94A3B8;
+  --accent: #8B5CF6;
+  --accent-hover: #A855F7;
+  --border-light: rgba(255, 255, 255, 0.05);
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: "Outfit", sans-serif;
+  font-weight: 900;
+  font-optical-sizing: auto;
+}
+
+.navbar {
+  background-color: rgba(28, 25, 41, 0.75) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.navbar-brand {
+  color: var(--text-main) !important;
+  letter-spacing: -0.5px;
+  font-family: "Outfit", sans-serif;
+  font-weight: 100;
+}
+
+.logo {
+    font-size: 2.00rem;
+}
+
+.text-dark {
+    color: rgba(var(--text-main)) !important;
+}
+
+.nav-link {
+  color: var(--text-main) !important;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: var(--accent-hover) !important;
+}
+
+footer {
+  background-color: var(--bg-surface) !important;
+  border-top: 1px solid var(--border-light);
+  color: var(--text-muted);
+}
+
+
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #332D4B;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+.post-card {
+  background-color: var(--bg-surface) !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.post-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4) !important;
+}

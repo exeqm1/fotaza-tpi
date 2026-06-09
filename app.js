@@ -2,39 +2,52 @@ const express = require('express');
 const path = require('path');
 require('dotenv').config();
 
-// Importamos el "Director de Orquesta" de los modelos
 const db = require('./models'); 
 
 const app = express();
 
-// Configuración del motor de plantillas (Views)
 app.set('view engine', 'pug');
-// Apuntamos a la carpeta de tus vistas (asegurate de tener esta ruta o adaptarla)
 app.set('views', path.join(__dirname, 'views'));
 
-// Middlewares básicos
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.get('/test', (req, res) => {
+    res.sendFile(path.join(__dirname, 'resources', 'img', 'logo.png'));
+});
+const fs = require('fs');
 
-// Ruta de prueba básica
+console.log(
+  fs.existsSync(path.join(__dirname, 'resources', 'img', 'logo.png'))
+);
+
+app.use('/resources', express.static(path.join(__dirname, 'resources')));
+
+
 app.get('/', (req, res) => {
-    res.render('index'); // Busca automáticamente index.pug en la carpeta views
+    res.render('index'); 
 });
 
-// PRUEBA DE FUEGO: Autenticar conexión y levantar servidor
+app.get('/posts', (req, res) => {
+    res.render('posts'); 
+});
+
+app.get('/profile', (req, res) => {
+    res.render('profile'); 
+});
+
 const PORT = process.env.PORT || 3000;
 
 async function startServer() {
     try {
         await db.sequelize.authenticate();
-        console.log('✅ Conexión a la base de datos de Laragon establecida con éxito.');
+        console.log('Conexión a la base de datos de Laragon establecida con éxito.');
         
         app.listen(PORT, () => {
-            console.log(`🚀 Servidor corriendo en: http://localhost:${PORT}`);
+            console.log(`Servidor corriendo en: http://localhost:${PORT}`);
         });
     } catch (error) {
-        console.error('❌ No se pudo conectar a la base de datos:', error);
+        console.error('No se pudo conectar a la base de datos:', error);
     }
 }
 
