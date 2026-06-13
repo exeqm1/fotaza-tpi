@@ -37,6 +37,7 @@ La arquitectura de la aplicación fue migrada con éxito a **Railway**, implemen
 
 ## Estructura Principal del Proyecto
 
+```text
 ├── config/                    # Configuración de Sequelize y variables de entorno
 ├── controllers/               # (authController, postsController, etc)
 ├── info/                      # Esquemas y diagramas del proyecto
