@@ -130,6 +130,20 @@ app.use((req, res) => {
     res.status(404).render('error', { message: 'La página que estás buscando no existe o fue eliminada.' });
 });
 
+app.use((err, req, res, next) => {
+    if (err.name === 'MulterError') {
+        if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+            return res.status(400).render('error', { message: 'Superaste el límite máximo de 5 imágenes permitidas. Por favor, volvé atrás e intentá de nuevo.' });
+        }
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).render('error', { message: 'Una o más imágenes superan el peso máximo permitido. Por favor, elegí fotos más livianas.' });
+        }
+        return res.status(400).render('error', { message: 'Error en la subida de archivos.' });
+    }
+    console.error('Error no manejado:', err);
+    res.status(500).render('error', { message: 'Ocurrió un error inesperado en el servidor.' });
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
