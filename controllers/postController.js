@@ -106,6 +106,13 @@ const createPost = async (req, res) => {
             return res.status(400).render('error', { message: 'No podés subir más de 5 imágenes por publicación.' });
         }
 
+        if (tags && tags.trim() !== '') {
+            const tempTags = tags.split(',').filter(t => t.trim() !== '');
+            if (tempTags.length > 5) {
+                return res.status(400).render('error', { message: 'No podés ingresar más de 5 etiquetas por publicación.' });
+            }
+        }
+
         const newPost = await db.Post.create({
             userId: req.session.user.id,
             title: title,
@@ -125,7 +132,7 @@ const createPost = async (req, res) => {
         }
 
         if (tags && tags.trim() !== '') {
-            const tagArray = tags.split(',').map(t => t.trim().toLowerCase()).filter(t => t !== '').slice(0, 5);
+            const tagArray = tags.split(',').map(t => t.trim().toLowerCase()).filter(t => t !== '');
             for (const tagName of tagArray) {
                 try {
                     await db.sequelize.query(

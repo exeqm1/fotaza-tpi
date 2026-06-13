@@ -43,4 +43,13 @@ block content
                 e.preventDefault();
                 alert('Por favor, seleccioná un máximo de 5 fotografías por publicación.');
               }
+              
+              const tagsInput = document.getElementById('tags');
+              if (tagsInput && tagsInput.value.trim() !== '') {
+                const tagsList = tagsInput.value.split(',').filter(t => t.trim() !== '');
+                if (tagsList.length > 5) {
+                  e.preventDefault();
+                  alert('Por favor, ingresá un máximo de 5 etiquetas por publicación.');
+                }
+              }
             });
