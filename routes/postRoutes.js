@@ -6,12 +6,7 @@ const fs = require('fs');
 const postController = require('../controllers/postController');
 const { requireAuth } = require('../middlewares/authMiddleware');
 
-const uploadDir = process.env.NODE_ENV === 'production' 
-    ? '/app/public/uploads' 
-    : path.join(__dirname, '../public/uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
+const uploadDir = path.join(__dirname, '../public/uploads');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
