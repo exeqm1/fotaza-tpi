@@ -13,6 +13,7 @@ const { requireAuth, requireAdmin } = require('./middlewares/authMiddleware');
 const userController = require('./controllers/userController');
 const profileRoutes = require('./routes/profileRoutes');
 const walletRoutes = require('./routes/walletRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
@@ -53,6 +54,8 @@ app.use('/auth', authRoutes);
 app.use('/profile', profileRoutes);
 
 app.use('/wallet', walletRoutes);
+
+app.use('/notifications', notificationRoutes);
 
 app.get('/login', (req, res) => {
     res.render('login'); 

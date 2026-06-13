@@ -87,6 +87,9 @@ const toggleFollow = async (req, res) => {
             await targetUser.removeFollower(currentUser);
         } else {
             await targetUser.addFollower(currentUser);
+            if (db.Notification) {
+                await db.Notification.create({ userId: targetUserId, type: 'FOLLOW' });
+            }
         }
         res.redirect(`/profile/${targetUserId}`);
     } catch (error) {

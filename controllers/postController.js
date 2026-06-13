@@ -132,6 +132,9 @@ const buyPost = async (req, res) => {
             await buyer.update({ walletBalance: parseFloat(buyer.walletBalance) - parseFloat(post.price) }, { transaction: t });
             await post.user.update({ walletBalance: parseFloat(post.user.walletBalance) + parseFloat(post.price) }, { transaction: t });
             await db.Purchase.create({ userId: buyerId, postId: postId, amount: post.price }, { transaction: t });
+            if (db.Notification) {
+                await db.Notification.create({ userId: post.userId, type: 'PURCHASE' }, { transaction: t });
+            }
         });
 
         res.redirect('/posts');
@@ -154,6 +157,12 @@ const ratePost = async (req, res) => {
             await existingRating.update({ value });
         } else {
             await db.Rating.create({ postId, userId, value });
+            if (db.Notification) {
+                const post = await db.Post.findByPk(postId);
+                if (post && post.userId !== userId) {
+                    await db.Notification.create({ userId: post.userId, type: 'RATE' });
+                }
+            }
         }
 
         const allRatings = await db.Rating.findAll({ where: { postId } });
@@ -186,6 +195,9 @@ const addComment = async (req, res) => {
         if (!post.allowComments) return res.status(403).send('Los comentarios están cerrados.');
 
         await db.Comment.create({ userId, postId, content: content.trim() });
+        if (db.Notification && post.userId !== userId) {
+            await db.Notification.create({ userId: post.userId, type: 'COMMENT' });
+        }
         res.redirect('/posts');
     } catch (error) {
         console.error('Error al agregar comentario:', error);

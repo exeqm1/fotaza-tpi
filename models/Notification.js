@@ -20,8 +20,9 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false
     });
 
-    Notification.associate = (models) => {
+    Notification.associate = function(models) {
         Notification.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
     };
+
     return Notification;
 };

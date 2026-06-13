@@ -62,7 +62,7 @@ block content
                 
                 .position-relative
                   if images.length > 1
-                    div.carousel.slide(id=`carousel-${post.id}` data-bs-theme="dark")
+                    div.carousel.slide(id=`carousel-${post.id}` data-bs-ride="carousel" data-bs-theme="dark")
                       div.carousel-inner
                         each img, index in images
                           div.carousel-item(class=(index === 0 ? 'active' : ''))
@@ -94,11 +94,16 @@ block content
                           button.bi.bi-heart-fill.rating-heart.fs-5.px-1(type="submit" name="rating" value=star style=`background:none; border:none; padding:0; cursor:pointer; ${star <= userRating ? 'color: #dc3545;' : ''}` title=`Dar ${star} puntos`)
 
                       i.bi.bi-chat-dots.comment-btn.fs-5(style="cursor: pointer;" onclick=`document.getElementById('comment-input-${post.id}').focus()`)
-                    div
+                    div.d-flex.align-items-center
                       span.badge.bg-primary.me-2 Fotografía
                       if post.forSale
                         span.badge.bg-success.me-2 En Venta
-                        span.text-success.fw-bold $#{post.price}
+                        span.text-success.fw-bold.me-3 $#{post.price}
+                        if user && post.userId !== user.id && !hasPurchased
+                          form(action=`/posts/buy/${post.id}` method="POST" class="m-0")
+                            button.btn.btn-success.btn-sm.fw-bold(type="submit")
+                              i.bi.bi-cart-plus.me-1
+                              | Comprar
                   
                   p.mb-1
                     a.text-decoration-none.fw-bold.me-2(href=`/profile/${post.userId}` style="color: inherit;") #{post.user ? post.user.username : 'Usuario'}
