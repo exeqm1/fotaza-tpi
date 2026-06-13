@@ -14,7 +14,7 @@ const getFeed = async (req, res) => {
             {
                 model: db.Image,
                 as: 'image',
-                attributes: ['filePath', 'averageRating']
+                attributes: ['filePath']
             },
             {
                 model: db.Comment,
@@ -59,7 +59,7 @@ const getFeed = async (req, res) => {
         if (postIds.length > 0) {
             const allImages = await db.Image.findAll({
                 where: { postId: postIds },
-                attributes: ['postId', 'filePath', 'averageRating']
+                attributes: ['postId', 'filePath']
             });
             
             const allTags = await db.sequelize.query(
@@ -212,9 +212,9 @@ const ratePost = async (req, res) => {
         const allRatings = await db.Rating.findAll({ where: { postId } });
         const avg = allRatings.reduce((sum, r) => sum + r.value, 0) / allRatings.length;
 
-        const image = await db.Image.findOne({ where: { postId } });
-        if (image) {
-            await image.update({ averageRating: avg });
+        const postToUpdate = await db.Post.findByPk(postId);
+        if (postToUpdate) {
+            await postToUpdate.update({ averageRating: avg });
         }
 
         res.redirect('/posts');

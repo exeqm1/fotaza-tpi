@@ -27,6 +27,7 @@ CREATE TABLE Posts (
     is_locked BOOLEAN NOT NULL DEFAULT FALSE,
     price DECIMAL(10, 2),
     date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    average_rating FLOAT DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
 );
 
@@ -36,7 +37,6 @@ CREATE TABLE Image (
     title VARCHAR(50) NOT NULL,
     file_path VARCHAR(255) NOT NULL,
     license_type ENUM('COPYRIGHT', 'PUBLIC_DOMAIN') NOT NULL,
-    average_rating FLOAT DEFAULT 0,
     watermark_text VARCHAR(50),
     FOREIGN KEY (post_id) REFERENCES Posts(post_id) ON DELETE CASCADE
 );

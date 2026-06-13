@@ -24,7 +24,8 @@ const getProfile = async (req, res) => {
             const postIds = user.posts.map(p => p.id);
             const allImages = await db.Image.findAll({ where: { postId: postIds } });
             user.posts.forEach(post => {
-                post.dataValues.imagesList = allImages.filter(img => img.postId === post.id);
+                post.dataValues.imagesList = allImages.filter(img => img.postId === post.id || (img.dataValues && img.dataValues.postId === post.id));
+                post.imagesList = post.dataValues.imagesList;
             });
         }
 

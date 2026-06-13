@@ -25,11 +25,6 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             field: 'license_type'
         },
-        averageRating: {
-            type: DataTypes.FLOAT,
-            defaultValue: 0,
-            field: 'average_rating'
-        },
         watermarkText: {
             type: DataTypes.STRING(50),
             field: 'watermark_text'

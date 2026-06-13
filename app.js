@@ -90,9 +90,15 @@ app.get('/admin', requireAdmin, async (req, res) => {
             where: { role: 'USER' },
             order: [['strikes', 'DESC'], ['id', 'ASC']]
         });
-        res.render('admin', { users }); 
+            
+            const reports = await db.Report.findAll({
+                order: [['date', 'DESC']]
+            });
+
+            res.render('admin', { users, reports }); 
     } catch (error) {
-        res.render('admin', { users: [] }); 
+        console.error('Error cargando el panel de admin:', error);
+        res.render('admin', { users: [], reports: [] }); 
     }
 });
 

@@ -63,7 +63,7 @@ block content
       if profileUser.posts && profileUser.posts.length > 0
         each post in profileUser.posts
           .col-12.col-sm-6.col-md-4
-            - const images = post.imagesList && post.imagesList.length > 0 ? post.imagesList : (Array.isArray(post.image) ? post.image : (post.image ? [post.image] : []))
+            - const images = (post.dataValues && post.dataValues.imagesList && post.dataValues.imagesList.length > 0) ? post.dataValues.imagesList : (post.imagesList && post.imagesList.length > 0 ? post.imagesList : (Array.isArray(post.image) ? post.image : (post.image ? [post.image] : [])))
             if images.length > 0
               div.ratio.ratio-1x1.d-block.rounded-4.overflow-hidden.shadow-sm(data-bs-toggle="modal" data-bs-target=`#postModal-${post.id}` style="cursor: pointer;")
                 img.object-fit-cover(src=images[0].filePath alt=`Post ${post.id}` style="transition: transform 0.4s ease, filter 0.4s ease;" onmouseover="this.style.transform='scale(1.08)'; this.style.filter='brightness(0.7)';" onmouseout="this.style.transform='scale(1)'; this.style.filter='brightness(1)';")
@@ -80,7 +80,7 @@ block content
 
     if profileUser.posts && profileUser.posts.length > 0
       each post in profileUser.posts
-        - const images = post.imagesList && post.imagesList.length > 0 ? post.imagesList : (Array.isArray(post.image) ? post.image : (post.image ? [post.image] : []))
+        - const images = (post.dataValues && post.dataValues.imagesList && post.dataValues.imagesList.length > 0) ? post.dataValues.imagesList : (post.imagesList && post.imagesList.length > 0 ? post.imagesList : (Array.isArray(post.image) ? post.image : (post.image ? [post.image] : [])))
         if images.length > 0
           .modal.fade(id=`postModal-${post.id}` tabindex="-1" aria-hidden="true")
             .modal-dialog.modal-dialog-centered.modal-xl
@@ -89,7 +89,7 @@ block content
                   button.btn-close.btn-close-white.position-absolute.top-0.end-0.m-3(type="button" data-bs-dismiss="modal" aria-label="Close" style="z-index: 1055;")
                   
                   if images.length > 1
-                    div.carousel.slide(id=`carouselModal-${post.id}` data-bs-ride="false" data-bs-wrap="false" data-bs-interval="false")
+                    div.carousel.slide(id=`carouselModal-${post.id}` data-bs-ride="false" data-bs-wrap="false" data-bs-interval="false" data-bs-theme="dark")
                       div.carousel-inner
                         each img, index in images
                           div.carousel-item(class=(index === 0 ? 'active' : ''))

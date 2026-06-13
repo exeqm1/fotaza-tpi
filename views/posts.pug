@@ -88,35 +88,30 @@ block content
                     .d-flex.align-items-center.gap-4
                       
                       form(action=`/posts/rate/${post.id}` method="POST").rating-container.d-flex.flex-row-reverse.align-items-center.m-0
-                        span.ms-2.text-muted.small (#{images.length > 0 && images[0].averageRating ? images[0].averageRating.toFixed(1) : '0.0'})
+                        span.ms-2.text-muted.small (#{post.averageRating ? parseFloat(post.averageRating).toFixed(1) : '0.0'})
                         - const userRating = post.ratings && post.ratings.length > 0 ? post.ratings[0].value : 0
                         each star in [5, 4, 3, 2, 1]
                           button.rating-heart.fs-5.px-1(type="submit" name="rating" value=star class=(star <= userRating ? 'bi bi-heart-fill text-danger' : 'bi bi-heart') style="background:none; border:none; padding:0; cursor:pointer;" title=`Dar ${star} puntos`)
 
                       i.bi.bi-chat-dots.comment-btn.fs-5(style="cursor: pointer;" onclick=`document.getElementById('comment-input-${post.id}').focus()`)
-                    div.d-flex.align-items-center
-                      span.badge.bg-primary.me-2 Fotografía
+                    div.d-flex.align-items-center.gap-2
+                      span.badge.bg-dark.text-light.border.border-secondary Fotografía
                       if post.forSale
-                        span.badge.bg-success.me-2 En Venta
-                        span.text-success.fw-bold.me-3 $#{post.price}
-                        if user && post.userId !== user.id && !hasPurchased
-                          form(action=`/posts/buy/${post.id}` method="POST" class="m-0")
-                            button.btn.btn-success.btn-sm.fw-bold(type="submit")
-                              i.bi.bi-cart-plus.me-1
-                              | Comprar
+                        span.badge.bg-dark.text-light.border.border-secondary En Venta
+                        span.text-success.fw-bold $#{post.price}
                   
-                  p.mb-1
-                    a.text-decoration-none.fw-bold.me-2(href=`/profile/${post.userId}` style="color: inherit;") #{post.user ? post.user.username : 'Usuario'}
-                  p.mb-1 #{post.title}
-                  p.card-text.text-muted.mb-2 #{post.descriptionText}
+                  .mt-2.mb-3
+                    a.text-decoration-none.fw-bold.me-2.fs-5(href=`/profile/${post.userId}` style="color: inherit;") #{post.user ? post.user.username : 'Usuario'}
+                    h5.fw-bold.mb-1.mt-2 #{post.title}
+                    p.card-text.text-muted.mb-3 #{post.descriptionText}
                   - const postTags = post.tagsList || (post.dataValues && post.dataValues.tagsList) || []
                   if postTags.length > 0
-                    .mb-2
+                    .d-flex.flex-wrap.gap-2.mb-3
                       each tag in postTags
-                        span.badge.bg-secondary.me-1 ##{tag}
-                  p.text-muted.small.mb-0 #{new Date(post.date).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        span.badge.rounded-pill.bg-dark.text-light.border.border-secondary(style="font-weight: 500; padding: 6px 12px;") ##{tag}
+                  p.text-muted.small.mb-0.border-bottom.pb-3 #{new Date(post.date).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
 
-                  .comments-section.mt-3.pt-3.border-top
+                  .comments-section.mt-3
                     if post.comments && post.comments.length > 0
                       each comment in post.comments
                         .d-flex.mb-2.align-items-start.justify-content-between
