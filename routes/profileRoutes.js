@@ -6,9 +6,7 @@ const fs = require('fs');
 const userController = require('../controllers/userController');
 const { requireAuth } = require('../middlewares/authMiddleware');
 
-const uploadDir = process.env.NODE_ENV === 'production' 
-    ? '/app/public/uploads' 
-    : path.join(__dirname, '../public/uploads');
+const uploadDir = path.join(__dirname, '../public/uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }

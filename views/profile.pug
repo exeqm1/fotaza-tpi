@@ -54,7 +54,7 @@ block content
               span.text-muted.small.fw-bold SEGUIDOS
 
     .d-flex.justify-content-between.align-items-center.mb-4
-      h4.fw-bold.mb-0 Portfolio
+      h4.fw-bold.mb-0 Posts
       select.form-select.form-select-sm.w-auto.bg-transparent.text-muted.border-secondary
         option(selected) Más recientes
         option Populares
@@ -63,9 +63,13 @@ block content
       if profileUser.posts && profileUser.posts.length > 0
         each post in profileUser.posts
           .col-12.col-sm-6.col-md-4
-            a.ratio.ratio-1x1.d-block.rounded-4.overflow-hidden.shadow-sm(href=`#`)
-              - const postImg = (post.image && post.image.filePath) ? post.image.filePath : `https://picsum.photos/600/600?random=${post.id}`
-              img.object-fit-cover(src=postImg alt=`Post ${post.id}` style="transition: transform 0.4s ease, filter 0.4s ease;" onmouseover="this.style.transform='scale(1.08)'; this.style.filter='brightness(0.7)';" onmouseout="this.style.transform='scale(1)'; this.style.filter='brightness(1)';")
+            - const images = post.imagesList && post.imagesList.length > 0 ? post.imagesList : (Array.isArray(post.image) ? post.image : (post.image ? [post.image] : []))
+            if images.length > 0
+              div.ratio.ratio-1x1.d-block.rounded-4.overflow-hidden.shadow-sm(data-bs-toggle="modal" data-bs-target=`#postModal-${post.id}` style="cursor: pointer;")
+                img.object-fit-cover(src=images[0].filePath alt=`Post ${post.id}` style="transition: transform 0.4s ease, filter 0.4s ease;" onmouseover="this.style.transform='scale(1.08)'; this.style.filter='brightness(0.7)';" onmouseout="this.style.transform='scale(1)'; this.style.filter='brightness(1)';")
+            else
+              .alert.alert-danger.small.text-center Imagen no encontrada
+
       else
         .col-12.text-center.py-5
           p.text-muted Todavía no hay publicaciones.
@@ -73,3 +77,27 @@ block content
     if user
       a.btn.btn-primary.position-fixed.bottom-0.end-0.m-4.rounded-circle.shadow-lg.d-flex.justify-content-center.align-items-center(href="/posts/create" style="width: 60px; height: 60px; background-color: var(--accent); border: none; z-index: 1000;" title="Subir Foto")
         i.bi.bi-plus-lg.fs-3
+
+    if profileUser.posts && profileUser.posts.length > 0
+      each post in profileUser.posts
+        - const images = post.imagesList && post.imagesList.length > 0 ? post.imagesList : (Array.isArray(post.image) ? post.image : (post.image ? [post.image] : []))
+        if images.length > 0
+          .modal.fade(id=`postModal-${post.id}` tabindex="-1" aria-hidden="true")
+            .modal-dialog.modal-dialog-centered.modal-xl
+              .modal-content.bg-transparent.border-0
+                .modal-body.p-0.position-relative.text-center
+                  button.btn-close.btn-close-white.position-absolute.top-0.end-0.m-3(type="button" data-bs-dismiss="modal" aria-label="Close" style="z-index: 1055;")
+                  
+                  if images.length > 1
+                    div.carousel.slide(id=`carouselModal-${post.id}` data-bs-ride="false" data-bs-wrap="false" data-bs-interval="false")
+                      div.carousel-inner
+                        each img, index in images
+                          div.carousel-item(class=(index === 0 ? 'active' : ''))
+                            img.img-fluid(src=img.filePath alt="Post image" style="max-height: 90vh; object-fit: contain;")
+                      
+                      button.carousel-control-prev(type="button" data-bs-target=`#carouselModal-${post.id}` data-bs-slide="prev" style="background-color: rgba(0,0,0,0.6); width: 40px; height: 40px; border-radius: 50%; top: 50%; transform: translateY(-50%); left: 10px; opacity: 1;")
+                        span.fw-bold.fs-5(style="color: white; line-height: 1;") &lt;
+                      button.carousel-control-next(type="button" data-bs-target=`#carouselModal-${post.id}` data-bs-slide="next" style="background-color: rgba(0,0,0,0.6); width: 40px; height: 40px; border-radius: 50%; top: 50%; transform: translateY(-50%); right: 10px; opacity: 1;")
+                        span.fw-bold.fs-5(style="color: white; line-height: 1;") &gt;
+                  else
+                    img.img-fluid(src=images[0].filePath alt="Post image" style="max-height: 90vh; object-fit: contain;")
