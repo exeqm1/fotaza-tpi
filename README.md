@@ -1,6 +1,6 @@
 # Fotaza — Trabajo Práctico Integrador (TPI)
 
-Repositorio oficial de **Fotaza**. Una plataforma web de gestión y publicación de fotografías que corresponden al Trabajo Práctico Integrador de la materia Programacion Web 2 para la carrera Tecnicatura Universitaria en Desarrollo de Software
+Repositorio de **Fotaza**. Una plataforma web de gestión y publicación de fotografías que corresponden al Trabajo Práctico Integrador de la materia Programacion Web 2 para la carrera Tecnicatura Universitaria en Desarrollo de Software
 
 ## Link a la web
 
