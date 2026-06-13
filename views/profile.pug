@@ -84,23 +84,61 @@ block content
         if images.length > 0
           .modal.fade(id=`postModal-${post.id}` tabindex="-1" aria-hidden="true")
             .modal-dialog.modal-dialog-centered.modal-xl
-              .modal-content.bg-transparent.border-0
-                .modal-body.p-0.position-relative.text-center
-                  button.btn-close.btn-close-white.position-absolute.top-0.end-0.m-3(type="button" data-bs-dismiss="modal" aria-label="Close" style="z-index: 1055;")
+              .modal-content.overflow-hidden(style="background-color: var(--bg-surface); border-radius: 16px; border: none;")
+                button.btn-close.btn-close-white.position-absolute.top-0.end-0.m-3(type="button" data-bs-dismiss="modal" aria-label="Close" style="z-index: 1055;")
+                .row.g-0
+                  .col-12.col-lg-8.bg-black.d-flex.align-items-center.justify-content-center.position-relative(style="min-height: 50vh;")
+                    if images.length > 1
+                      div.carousel.slide(id=`carouselModal-${post.id}` data-bs-ride="false" data-bs-wrap="false" data-bs-interval="false" data-bs-theme="dark" style="width: 100%;")
+                        div.carousel-inner
+                          each img, index in images
+                            div.carousel-item(class=(index === 0 ? 'active' : ''))
+                              img.img-fluid.d-block.mx-auto(src=img.filePath alt="Post image" style="max-height: 90vh; object-fit: contain;")
+                        
+                        button.carousel-control-prev(type="button" data-bs-target=`#carouselModal-${post.id}` data-bs-slide="prev" style="background-color: rgba(0,0,0,0.6); width: 40px; height: 40px; border-radius: 50%; top: 50%; transform: translateY(-50%); left: 10px; opacity: 1;")
+                          span.fw-bold.fs-5(style="color: white; line-height: 1;") &lt;
+                        button.carousel-control-next(type="button" data-bs-target=`#carouselModal-${post.id}` data-bs-slide="next" style="background-color: rgba(0,0,0,0.6); width: 40px; height: 40px; border-radius: 50%; top: 50%; transform: translateY(-50%); right: 10px; opacity: 1;")
+                          span.fw-bold.fs-5(style="color: white; line-height: 1;") &gt;
+                    else
+                      img.img-fluid.d-block.mx-auto(src=images[0].filePath alt="Post image" style="max-height: 90vh; object-fit: contain;")
                   
-                  if images.length > 1
-                    div.carousel.slide(id=`carouselModal-${post.id}` data-bs-ride="false" data-bs-wrap="false" data-bs-interval="false" data-bs-theme="dark")
-                      div.carousel-inner
-                        each img, index in images
-                          div.carousel-item(class=(index === 0 ? 'active' : ''))
-                            img.img-fluid(src=img.filePath alt="Post image" style="max-height: 90vh; object-fit: contain;")
+                  .col-12.col-lg-4.d-flex.flex-column(style="max-height: 90vh;")
+                    .p-3.border-bottom.border-secondary
+                      .d-flex.align-items-center
+                        if profileUser.avatarUrl
+                          img.rounded-circle.me-2(src=profileUser.avatarUrl alt="Avatar" width="40" height="40" style="object-fit: cover;")
+                        else
+                          i.bi.bi-person-circle.fs-2.me-2(style="color: var(--text-muted); line-height: 1;")
+                        div
+                          h6.mb-0.fw-bold #{profileUser.username}
+                          small.text-muted #{new Date(post.date).toLocaleDateString('es-AR')}
+                    
+                    .p-3.overflow-auto.flex-grow-1
+                      if post.title
+                        h5.fw-bold.mb-2 #{post.title}
+                      if post.descriptionText
+                        p.text-muted.small.mb-3 #{post.descriptionText}
                       
-                      button.carousel-control-prev(type="button" data-bs-target=`#carouselModal-${post.id}` data-bs-slide="prev" style="background-color: rgba(0,0,0,0.6); width: 40px; height: 40px; border-radius: 50%; top: 50%; transform: translateY(-50%); left: 10px; opacity: 1;")
-                        span.fw-bold.fs-5(style="color: white; line-height: 1;") &lt;
-                      button.carousel-control-next(type="button" data-bs-target=`#carouselModal-${post.id}` data-bs-slide="next" style="background-color: rgba(0,0,0,0.6); width: 40px; height: 40px; border-radius: 50%; top: 50%; transform: translateY(-50%); right: 10px; opacity: 1;")
-                        span.fw-bold.fs-5(style="color: white; line-height: 1;") &gt;
-                  else
-                    img.img-fluid(src=images[0].filePath alt="Post image" style="max-height: 90vh; object-fit: contain;")
+                      .comments-section.mt-4
+                        h6.fw-bold.mb-3 Comentarios
+                        if post.comments && post.comments.length > 0
+                          each comment in post.comments
+                            .d-flex.mb-3.align-items-start
+                              if comment.user && comment.user.avatarUrl
+                                img.rounded-circle.me-2(src=comment.user.avatarUrl alt="Avatar" width="32" height="32" style="object-fit: cover;")
+                              else
+                                i.bi.bi-person-circle.fs-3.me-2(style="color: var(--text-muted); line-height: 1;")
+                              div
+                                span.fw-bold.me-2.small #{comment.user ? comment.user.username : 'Usuario'}
+                                span.small #{comment.content}
+                        else
+                          p.text-muted.small No hay comentarios todavía.
+                    
+                    if post.allowComments && user
+                      .p-3.border-top.border-secondary
+                        form.d-flex(action=`/posts/comment/${post.id}` method="POST")
+                          input.form-control.form-control-sm.me-2.border-secondary(type="text" name="content" placeholder="Agregar un comentario..." required)
+                          button.btn.btn-sm.btn-primary.fw-bold(type="submit") Publicar
 
     if profileUser.followers
       .modal.fade(id="followersModal" tabindex="-1")

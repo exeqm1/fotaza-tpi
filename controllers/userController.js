@@ -9,7 +9,14 @@ const getProfile = async (req, res) => {
                 {
                     model: db.Post,
                     as: 'posts',
-                    include: [{ model: db.Image, as: 'image' }]
+                    include: [
+                        { model: db.Image, as: 'image' },
+                        { 
+                            model: db.Comment, 
+                            as: 'comments',
+                            include: [{ model: db.User, as: 'user', attributes: ['username', 'avatarUrl'] }]
+                        }
+                    ]
                 },
                 { model: db.User, as: 'followers' },
                 { model: db.User, as: 'following' }

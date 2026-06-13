@@ -102,6 +102,10 @@ const createPost = async (req, res) => {
             return res.status(400).render('error', { message: 'Es obligatorio subir al menos una imagen.' });
         }
 
+        if (req.files.length > 5) {
+            return res.status(400).render('error', { message: 'No podés subir más de 5 imágenes por publicación.' });
+        }
+
         const newPost = await db.Post.create({
             userId: req.session.user.id,
             title: title,

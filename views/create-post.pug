@@ -35,3 +35,12 @@ block content
               button.btn.btn-primary.btn-lg.fw-bold(type="submit") 
                 i.bi.bi-cloud-arrow-up.me-2
                 | Publicar Fotografía
+
+          script.
+            document.querySelector('form').addEventListener('submit', function(e) {
+              const fileInput = document.getElementById('image');
+              if (fileInput.files && fileInput.files.length > 5) {
+                e.preventDefault();
+                alert('Por favor, seleccioná un máximo de 5 fotografías por publicación.');
+              }
+            });
