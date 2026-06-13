@@ -27,7 +27,6 @@ const getFeed = async (req, res) => {
             }
         ];
         
-        // Solo buscamos las compras si el usuario inició sesión
         if (userId) {
             includeArray.push({
                 model: db.Purchase,
@@ -92,7 +91,6 @@ const createPost = async (req, res) => {
             postStatus: 'ACTIVE'
         });
 
-        // Guardamos todas las imágenes
         for (const file of req.files) {
             await db.Image.create({
                 postId: newPost.id,
@@ -114,7 +112,6 @@ const buyPost = async (req, res) => {
         const postId = req.params.id;
         const buyerId = req.session.user.id;
 
-        // Buscar el post y a su dueño
         const post = await db.Post.findByPk(postId, {
             include: [{ model: db.User, as: 'user' }]
         });
@@ -123,26 +120,21 @@ const buyPost = async (req, res) => {
         if (!post.forSale || post.price <= 0) return res.status(400).send('Esta foto no está a la venta.');
         if (post.userId === buyerId) return res.status(400).send('No podés comprar tu propia obra.');
 
-        // Verificar que no la haya comprado antes
         const existingPurchase = await db.Purchase.findOne({ where: { postId, userId: buyerId } });
         if (existingPurchase) return res.status(400).send('Ya compraste esta fotografía.');
 
-        // Verificar el saldo del comprador
         const buyer = await db.User.findByPk(buyerId);
         if (parseFloat(buyer.walletBalance) < parseFloat(post.price)) {
             return res.status(400).send('Saldo insuficiente en tu billetera. Por favor, recargá primero.');
         }
 
-        // Transacción Atómica de Compra
         await db.sequelize.transaction(async (t) => {
-            // 1. Restamos saldo al comprador y sumamos al dueño de la foto
             await buyer.update({ walletBalance: parseFloat(buyer.walletBalance) - parseFloat(post.price) }, { transaction: t });
             await post.user.update({ walletBalance: parseFloat(post.user.walletBalance) + parseFloat(post.price) }, { transaction: t });
-            // 2. Registramos la nueva compra
             await db.Purchase.create({ userId: buyerId, postId: postId, amount: post.price }, { transaction: t });
         });
 
-        res.redirect('/posts'); // Éxito -> Al recargar, la foto ya va a estar desbloqueada
+        res.redirect('/posts');
     } catch (error) {
         console.error('Error al procesar la compra:', error);
         res.status(500).send('Error interno del servidor al intentar realizar el pago.');
@@ -157,7 +149,6 @@ const ratePost = async (req, res) => {
 
         if (!value || value < 1 || value > 5) return res.status(400).send('Calificación inválida.');
 
-        // Verifica si ya había calificado, si es así, actualiza; si no, crea el rating
         const existingRating = await db.Rating.findOne({ where: { postId, userId } });
         if (existingRating) {
             await existingRating.update({ value });
@@ -165,7 +156,6 @@ const ratePost = async (req, res) => {
             await db.Rating.create({ postId, userId, value });
         }
 
-        // Recalcular el promedio y guardarlo en la Imagen
         const allRatings = await db.Rating.findAll({ where: { postId } });
         const avg = allRatings.reduce((sum, r) => sum + r.value, 0) / allRatings.length;
 
@@ -191,6 +181,10 @@ const addComment = async (req, res) => {
             return res.status(400).send('El comentario no puede estar vacío.');
         }
 
+        const post = await db.Post.findByPk(postId);
+        if (!post) return res.status(404).send('Publicación no encontrada.');
+        if (!post.allowComments) return res.status(403).send('Los comentarios están cerrados.');
+
         await db.Comment.create({ userId, postId, content: content.trim() });
         res.redirect('/posts');
     } catch (error) {
@@ -199,4 +193,66 @@ const addComment = async (req, res) => {
     }
 };
 
-module.exports = { getFeed, getCreateForm, createPost, buyPost, ratePost, addComment };
+const reportPost = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const userId = req.session.user.id;
+        const { reason } = req.body;
+
+        if (!reason || reason.trim() === '') {
+            return res.status(400).send('Debes especificar un motivo.');
+        }
+
+        await db.Report.create({
+            userId,
+            postId,
+            reason: reason.trim(),
+            contentType: 'POST'
+        });
+
+        res.redirect('/posts');
+    } catch (error) {
+        res.status(500).send('Error interno al reportar.');
+    }
+};
+
+const reportComment = async (req, res) => {
+    try {
+        const commentId = req.params.id;
+        const userId = req.session.user.id;
+        const { reason } = req.body;
+
+        if (!reason || reason.trim() === '') {
+            return res.status(400).send('Debes especificar un motivo.');
+        }
+
+        await db.Report.create({
+            userId,
+            commentId,
+            reason: reason.trim(),
+            contentType: 'COMMENT'
+        });
+
+        res.redirect('/posts');
+    } catch (error) {
+        res.status(500).send('Error interno al reportar.');
+    }
+};
+
+const toggleComments = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const userId = req.session.user.id;
+
+        const post = await db.Post.findByPk(postId);
+        if (!post) return res.status(404).send('Publicación no encontrada.');
+        if (post.userId !== userId) return res.status(403).send('No autorizado.');
+
+        await post.update({ allowComments: !post.allowComments });
+        res.redirect('/posts');
+    } catch (error) {
+        res.status(500).send('Error interno al cambiar estado de comentarios.');
+    }
+};
+
+module.exports = { getFeed, getCreateForm, createPost, buyPost, ratePost, addComment, reportPost, reportComment, toggleComments };

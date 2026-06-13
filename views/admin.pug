@@ -18,23 +18,32 @@ block content
                 thead
                   tr
                     th ID
-                    th Usuario Reportado
-                    th Motivo del Reporte
-                    th Fecha
+                    th Usuario
+                    th Estado / Strikes
+                    th Correo Electrónico
                     th Acciones
                 tbody
-                  each val in [1, 2, 3]
+                  if users && users.length > 0
+                    each u in users
+                      tr
+                        td ##{u.id}
+                        td.fw-bold
+                          a.text-decoration-none(href=`/profile/${u.id}` style="color: inherit;") #{u.username}
+                        td 
+                          if u.status === 'BANNED'
+                            span.badge.bg-danger Baneado
+                          else
+                            | Strikes: #{u.strikes}
+                        td #{u.email}
+                        td
+                          .d-flex.align-items-center
+                            if u.status !== 'BANNED'
+                              form(action=`/admin/strike/${u.id}` method="POST" class="m-0 p-0")
+                                button.btn.btn-sm.btn-danger.me-2(title="Aplicar Strike / Banear" type="submit")
+                                  i.bi.bi-hammer.me-1
+                                  | Sancionar
+                            else
+                              button.btn.btn-sm.btn-secondary.me-2(disabled) Sancionado
+                  else
                     tr
-                      td ##{val * 1024}
-                      td.fw-bold UsuarioMalicioso#{val}
-                      td Spam / Contenido Inapropiado
-                      td Hace #{val} horas
-                      td
-                        .d-flex.align-items-center
-                          form(action=`/admin/strike/${val}` method="POST" class="m-0 p-0")
-                            button.btn.btn-sm.btn-danger.me-2(title="Aplicar Strike / Banear" type="submit")
-                              i.bi.bi-hammer.me-1
-                              | Sancionar
-                        button.btn.btn-sm.btn-success(title="Desestimar Reporte")
-                          i.bi.bi-check-lg.me-1
-                          | Ignorar
+                      td(colspan="5").text-center.text-muted No hay usuarios registrados o reportados.

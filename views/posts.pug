@@ -27,15 +27,35 @@ block content
           if posts && posts.length > 0
             each post in posts
               .card.border-0.post-card
-                .card-header.bg-transparent.border-0.d-flex.align-items-center.py-3
+                - const isOwner = user && post.userId === user.id
+                .card-header.bg-transparent.border-0.d-flex.align-items-center.justify-content-between.py-3
                   a.d-flex.align-items-center.text-decoration-none(href=`/profile/${post.userId}` style="color: inherit;")
                     if post.user && post.user.avatarUrl
                       img.rounded-circle.me-3(src=post.user.avatarUrl alt="Avatar" width="40" height="40" style="object-fit: cover;")
                     else
                       i.bi.bi-person-circle.fs-2.me-3(style="color: var(--text-muted);")
                     span.fw-bold #{post.user ? post.user.username : 'Usuario'}
-                
-                - const isOwner = user && post.userId === user.id
+                  if user
+                    .dropdown
+                      button.btn.btn-link.text-muted.p-0(type="button" data-bs-toggle="dropdown" aria-expanded="false")
+                        i.bi.bi-three-dots-vertical.fs-5
+                      ul.dropdown-menu.dropdown-menu-end.shadow-sm(style="background-color: var(--bg-surface); border: 1px solid var(--bs-border-color);")
+                        if isOwner
+                          li
+                            form(action=`/posts/${post.id}/toggle-comments` method="POST" class="m-0")
+                              button.dropdown-item(type="submit")
+                                if post.allowComments
+                                  i.bi.bi-chat-slash.me-2
+                                  | Cerrar comentarios
+                                else
+                                  i.bi.bi-chat-dots.me-2
+                                  | Abrir comentarios
+                        else
+                          li
+                            button.dropdown-item.text-danger(type="button" data-bs-toggle="modal" data-bs-target=`#reportPostModal-${post.id}`)
+                              i.bi.bi-flag.me-2
+                              | Reportar publicación
+
                 - const hasPurchased = post.purchases && post.purchases.length > 0
                 - const isLocked = post.forSale && post.price > 0 && !isOwner && !hasPurchased
                 - const images = Array.isArray(post.image) ? post.image : (post.image ? [post.image] : [])
@@ -89,26 +109,67 @@ block content
                   .comments-section.mt-3.pt-3.border-top
                     if post.comments && post.comments.length > 0
                       each comment in post.comments
-                        .d-flex.mb-2.align-items-start
-                          if comment.user && comment.user.avatarUrl
-                            img.rounded-circle.me-2(src=comment.user.avatarUrl alt="Avatar" width="30" height="30" style="object-fit: cover;")
-                          else
-                            i.bi.bi-person-circle.fs-4.me-2(style="color: var(--text-muted); line-height: 1;")
-                          div
-                            span.fw-bold.me-2.small #{comment.user ? comment.user.username : 'Usuario'}
-                            span.small #{comment.content}
+                        .d-flex.mb-2.align-items-start.justify-content-between
+                          .d-flex.align-items-start
+                            if comment.user && comment.user.avatarUrl
+                              img.rounded-circle.me-2(src=comment.user.avatarUrl alt="Avatar" width="30" height="30" style="object-fit: cover;")
+                            else
+                              i.bi.bi-person-circle.fs-4.me-2(style="color: var(--text-muted); line-height: 1;")
+                            div
+                              span.fw-bold.me-2.small #{comment.user ? comment.user.username : 'Usuario'}
+                              span.small #{comment.content}
+                          if user && comment.userId !== user.id
+                            button.btn.btn-link.text-muted.p-0.ms-2(type="button" title="Reportar comentario" data-bs-toggle="modal" data-bs-target=`#reportCommentModal-${comment.id}`)
+                              i.bi.bi-flag
                     else
                       p.text-muted.small No hay comentarios todavía. Sé el primero en comentar.
                     
-                    if user
-                      form.d-flex.mt-3(action=`/posts/comment/${post.id}` method="POST")
-                        input.form-control.form-control-sm.me-2.border-secondary(id=`comment-input-${post.id}` type="text" name="content" placeholder="Agregar un comentario..." required)
-                        button.btn.btn-sm.btn-primary.fw-bold(type="submit") Publicar
+                    if post.allowComments
+                      if user
+                        form.d-flex.mt-3(action=`/posts/comment/${post.id}` method="POST")
+                          input.form-control.form-control-sm.me-2.border-secondary(id=`comment-input-${post.id}` type="text" name="content" placeholder="Agregar un comentario..." required)
+                          button.btn.btn-sm.btn-primary.fw-bold(type="submit") Publicar
+                    else
+                      p.text-muted.small.mt-3.fst-italic Los comentarios están cerrados.
           else
             .alert.text-center.border-0.shadow-sm(style="background-color: var(--bg-surface); color: var(--text-main); border-radius: 12px; padding: 3rem 1rem;")
               i.bi.bi-camera.fs-1.mb-3.d-block(style="color: var(--text-muted);")
               h4.fw-bold No hay publicaciones disponibles
               p.text-muted Todavía no hay fotos en nuestra comunidad. ¡Animate a subir la primera!
+
+    if posts && posts.length > 0
+      each post in posts
+        if user && post.userId !== user.id
+          .modal.fade(id=`reportPostModal-${post.id}` tabindex="-1")
+            .modal-dialog
+              .modal-content(style="background-color: var(--bg-surface);")
+                .modal-header.border-secondary
+                  h5.modal-title.fw-bold Reportar Publicación
+                  button.btn-close(type="button" data-bs-dismiss="modal")
+                .modal-body
+                  form(action=`/posts/${post.id}/report` method="POST")
+                    .mb-3
+                      label.form-label.text-muted Motivo del reporte
+                      input.form-control.border-secondary.bg-transparent(type="text" name="reason" required placeholder="Ej: Contenido inapropiado, spam, etc.")
+                    .text-end
+                      button.btn.btn-danger(type="submit") Enviar Reporte
+
+        if post.comments && post.comments.length > 0
+          each comment in post.comments
+            if user && comment.userId !== user.id
+              .modal.fade(id=`reportCommentModal-${comment.id}` tabindex="-1")
+                .modal-dialog
+                  .modal-content(style="background-color: var(--bg-surface);")
+                    .modal-header.border-secondary
+                      h5.modal-title.fw-bold Reportar Comentario
+                      button.btn-close(type="button" data-bs-dismiss="modal")
+                    .modal-body
+                      form(action=`/posts/comment/${comment.id}/report` method="POST")
+                        .mb-3
+                          label.form-label.text-muted Motivo del reporte
+                          input.form-control.border-secondary.bg-transparent(type="text" name="reason" required placeholder="Ej: Lenguaje ofensivo, spam, etc.")
+                        .text-end
+                          button.btn.btn-danger(type="submit") Enviar Reporte
 
     if user
       a.btn.btn-primary.position-fixed.bottom-0.end-0.m-4.rounded-circle.shadow-lg.d-flex.justify-content-center.align-items-center(href="/posts/create" style="width: 60px; height: 60px; z-index: 1000;" title="Subir Foto")

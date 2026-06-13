@@ -29,8 +29,14 @@ block content
       .d-flex.justify-content-center.gap-2
         if user && profileUser.id === user.id
           a.btn.btn-sm.btn-outline-secondary.px-3(href="/profile/edit" title="Editar Perfil" style="border-radius: 20px;") Editar perfil
-        else
-          button.btn.btn-sm.px-4.fw-bold(style="background-color: var(--text-main); color: var(--bg-main); border-radius: 20px;" disabled) Seguir
+        else if user
+          - const isFollowing = profileUser.followers && profileUser.followers.some(f => f.id === user.id)
+          form(action=`/profile/${profileUser.id}/follow` method="POST" class="m-0")
+            button.btn.btn-sm.px-4.fw-bold(type="submit" style=`background-color: ${isFollowing ? 'transparent' : 'var(--text-main)'}; color: ${isFollowing ? 'var(--text-main)' : 'var(--bg-main)'}; border: 1px solid var(--text-main); border-radius: 20px;`)
+              if isFollowing
+                | Dejar de seguir
+              else
+                | Seguir
 
 
     .row.justify-content-center.mb-5
@@ -47,14 +53,12 @@ block content
               h4.fw-bold.mb-0 #{profileUser.following ? profileUser.following.length : 0}
               span.text-muted.small.fw-bold SEGUIDOS
 
-    //- Cabecera de la Galería
     .d-flex.justify-content-between.align-items-center.mb-4
       h4.fw-bold.mb-0 Portfolio
       select.form-select.form-select-sm.w-auto.bg-transparent.text-muted.border-secondary
         option(selected) Más recientes
         option Populares
 
-    //- Galería de Trabajos (Grid más espaciado y moderno)
     .row.g-4.mb-5
       if profileUser.posts && profileUser.posts.length > 0
         each post in profileUser.posts

@@ -4,7 +4,6 @@ const getProfile = async (req, res) => {
     try {
         const userId = req.params.id || req.session.user.id;
 
-        // Buscamos al usuario incluyendo sus posts, seguidores y a los que sigue
         const user = await db.User.findByPk(userId, {
             include: [
                 {
@@ -19,7 +18,6 @@ const getProfile = async (req, res) => {
 
         if (!user) return res.status(404).send('Usuario no encontrado');
 
-        // Renderizamos la vista pasando los datos como 'profileUser'
         res.render('profile', { profileUser: user });
     } catch (error) {
         console.error('Error al cargar el perfil:', error);
@@ -55,7 +53,6 @@ const updateProfile = async (req, res) => {
 
         await user.update(updateData);
 
-        // Actualizamos la sesión para que se reflejen los cambios en la barra de navegación
         req.session.user.username = user.username;
         req.session.user.avatarUrl = user.avatarUrl;
         req.session.user.coverUrl = user.coverUrl;
@@ -70,4 +67,55 @@ const updateProfile = async (req, res) => {
     }
 };
 
-module.exports = { getProfile, getEditProfile, updateProfile };
+const toggleFollow = async (req, res) => {
+    try {
+        const currentUserId = req.session.user.id;
+        const targetUserId = req.params.id;
+
+        if (currentUserId.toString() === targetUserId) return res.status(400).send('No podés seguirte a vos mismo.');
+
+        const currentUser = await db.User.findByPk(currentUserId);
+        const targetUser = await db.User.findByPk(targetUserId, {
+            include: [{ model: db.User, as: 'followers' }]
+        });
+
+        if (!targetUser) return res.status(404).send('Usuario no encontrado');
+
+        const isFollowing = targetUser.followers.some(follower => follower.id === currentUserId);
+
+        if (isFollowing) {
+            await targetUser.removeFollower(currentUser);
+        } else {
+            await targetUser.addFollower(currentUser);
+        }
+        res.redirect(`/profile/${targetUserId}`);
+    } catch (error) {
+        console.error('Error al seguir/dejar de seguir:', error);
+        res.status(500).send('Error interno.');
+    }
+};
+
+const getWallet = async (req, res) => {
+    try {
+        const user = await db.User.findByPk(req.session.user.id);
+        res.render('wallet', { walletBalance: user.walletBalance });
+    } catch (error) {
+        res.status(500).send('Error al cargar la billetera');
+    }
+};
+
+const rechargeWallet = async (req, res) => {
+    try {
+        const amount = parseFloat(req.body.amount);
+        if (!amount || amount <= 0) return res.status(400).send('Monto inválido');
+        
+        const user = await db.User.findByPk(req.session.user.id);
+        await user.update({ walletBalance: parseFloat(user.walletBalance) + amount });
+        
+        res.redirect('/wallet');
+    } catch (error) {
+        res.status(500).send('Error al recargar saldo');
+    }
+};
+
+module.exports = { getProfile, getEditProfile, updateProfile, toggleFollow, getWallet, rechargeWallet };

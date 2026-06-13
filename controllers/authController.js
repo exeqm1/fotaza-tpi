@@ -6,7 +6,6 @@ const registerUser = async (req, res) => {
     try {
         const { username, email, password } = req.body;
         
-        // Encriptar la contraseña antes de guardarla en la DB (10 rondas de salt)
         const hashedPassword = await bcrypt.hash(password, 10);
         
         await db.User.create({
@@ -17,7 +16,6 @@ const registerUser = async (req, res) => {
             status: 'ACTIVE'
         });
 
-        // Si se registró exitosamente, lo mandamos al login
         res.redirect('/login');
     } catch (error) {
         console.error('Error al registrar usuario:', error);
@@ -29,19 +27,16 @@ const loginUser = async (req, res) => {
     try {
         const { username, password } = req.body;
         
-        // Buscar al usuario por nombre de usuario o por email
         const user = await db.User.findOne({
             where: {
                 [Op.or]: [{ username: username }, { email: username }]
             }
         });
 
-        // Validar si el usuario existe y si la contraseña coincide
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(401).send('Credenciales inválidas. Por favor, intentá nuevamente.');
         }
 
-        // Guardar los datos del usuario en la sesión
         req.session.user = {
             id: user.id,
             username: user.username,

@@ -6,13 +6,11 @@ const fs = require('fs');
 const userController = require('../controllers/userController');
 const { requireAuth } = require('../middlewares/authMiddleware');
 
-// Asegurarnos de que exista la carpeta para guardar las imágenes
 const uploadDir = path.join(__dirname, '../public/uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Configuración de Multer para perfil
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, uploadDir);
@@ -27,6 +25,7 @@ const upload = multer({ storage: storage });
 router.get('/', requireAuth, userController.getProfile);
 router.get('/edit', requireAuth, userController.getEditProfile);
 router.post('/edit', requireAuth, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.updateProfile);
+router.post('/:id/follow', requireAuth, userController.toggleFollow);
 router.get('/:id', requireAuth, userController.getProfile);
 
 module.exports = router;

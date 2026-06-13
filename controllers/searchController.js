@@ -6,7 +6,6 @@ const search = async (req, res) => {
         const query = req.query.q;
         if (!query) return res.redirect('/posts');
 
-        // Buscar Usuarios (por su username)
         const users = await db.User.findAll({
             where: {
                 username: { [Op.like]: `%${query}%` }
@@ -14,7 +13,6 @@ const search = async (req, res) => {
             attributes: ['id', 'username', 'avatarUrl', 'bio']
         });
 
-        // Buscar Publicaciones (por título o por descripción simulando tags)
         const userId = req.session && req.session.user ? req.session.user.id : null;
         const includeArray = [
             { model: db.User, as: 'user', attributes: ['username', 'avatarUrl'] },
@@ -38,7 +36,6 @@ const search = async (req, res) => {
             order: [['date', 'DESC']]
         });
 
-        // Enviar resultados a la nueva vista
         res.render('search', { users, posts, query });
     } catch (error) {
         console.error('Error en la búsqueda:', error);

@@ -1,0 +1,26 @@
+extends layouts/main.pug
+
+block content
+  .row.justify-content-center.align-items-center(style="min-height: 70vh;")
+    .col-12.col-md-6.col-lg-5
+      .card.border-0.shadow-lg(style="background-color: var(--bg-surface); border-radius: 20px;")
+        .card-body.p-4.p-md-5.text-center
+          i.bi.bi-wallet2.mb-3.d-block(style="font-size: 4rem; color: var(--accent);")
+          h2.fw-bold.mb-1 Mi Billetera
+          p.text-muted.mb-4 Consultá tu saldo y recargá fondos.
+          
+          .bg-dark.rounded-4.p-4.mb-4.shadow-sm(style="border: 1px solid var(--bs-border-color);")
+            p.text-muted.mb-1.small SALDO ACTUAL
+            h1.fw-bold.mb-0.text-success $#{walletBalance ? parseFloat(walletBalance).toFixed(2) : '0.00'}
+          
+          form(action="/wallet/recharge" method="POST")
+            .mb-4.text-start
+              label.form-label.text-muted(for="amount") Monto a recargar ($)
+              .input-group
+                span.input-group-text.border-secondary.bg-transparent $
+                input#amount.form-control.border-secondary.bg-transparent(type="number" name="amount" min="100" step="100" required placeholder="Ej: 1500")
+            
+            .d-grid
+              button.btn.btn-primary.btn-lg.fw-bold(type="submit" style="border-radius: 12px;") 
+                i.bi.bi-credit-card.me-2
+                | Simular Recarga

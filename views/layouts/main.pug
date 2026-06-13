@@ -34,6 +34,8 @@ html(lang="es" data-bs-theme="dark")
               a.nav-link(href="/posts") Explorar
             if user
               li.nav-item
+                a.nav-link(href="/wallet") Billetera
+              li.nav-item
                 a.nav-link(href="/profile") #{user.username}
               if user.role === 'ADMIN'
                 li.nav-item

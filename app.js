@@ -12,6 +12,7 @@ const authRoutes = require('./routes/authRoutes');
 const { requireAuth, requireAdmin } = require('./middlewares/authMiddleware');
 const userController = require('./controllers/userController');
 const profileRoutes = require('./routes/profileRoutes');
+const walletRoutes = require('./routes/walletRoutes');
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
@@ -30,14 +31,12 @@ console.log(
 
 app.use('/resources', express.static(path.join(__dirname, 'resources')));
 
-// Configurar Express Session
 app.use(session({
     secret: process.env.SESSION_SECRET || 'super_secreto_fotaza',
     resave: false,
     saveUninitialized: false
 }));
 
-// Middleware global para pasar los datos de la sesión real a las vistas Pug
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     next();
@@ -47,14 +46,13 @@ app.get('/', (req, res) => {
     res.render('index'); 
 });
 
-// Usar las rutas de posts (esto mapea automáticamente a /posts y /posts/create)
 app.use('/posts', postRoutes);
 
-// Usar las rutas de autenticación
 app.use('/auth', authRoutes);
 
-// Usar las rutas de perfil
 app.use('/profile', profileRoutes);
+
+app.use('/wallet', walletRoutes);
 
 app.get('/login', (req, res) => {
     res.render('login'); 
@@ -64,8 +62,16 @@ app.get('/register', (req, res) => {
     res.render('register'); 
 });
 
-app.get('/admin', requireAdmin, (req, res) => {
-    res.render('admin'); 
+app.get('/admin', requireAdmin, async (req, res) => {
+    try {
+        const users = await db.User.findAll({
+            where: { role: 'USER' },
+            order: [['strikes', 'DESC'], ['id', 'ASC']]
+        });
+        res.render('admin', { users }); 
+    } catch (error) {
+        res.render('admin', { users: [] }); 
+    }
 });
 
 app.post('/admin/strike/:id', requireAdmin, async (req, res) => {
@@ -86,8 +92,7 @@ async function startServer() {
     try {
         await db.sequelize.authenticate();
         
-        // Sincroniza los modelos actualizando las tablas (ej: expandiendo el límite del password)
-        await db.sequelize.sync({ alter: true });
+        await db.sequelize.sync();
         
         console.log('Conexión a la base de datos de Laragon establecida con éxito.');
         

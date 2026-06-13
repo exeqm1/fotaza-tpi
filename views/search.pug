@@ -1,0 +1,81 @@
+extends layouts/main.pug
+
+block content
+  .container
+    .row.mb-4
+      .col
+        h2.fw-bold Resultados de búsqueda para "#{query}"
+
+    if users && users.length > 0
+      .row.mb-5
+        .col-12
+          h4.fw-bold.mb-3 Usuarios encontrados
+          .d-flex.flex-wrap.gap-3
+            each u in users
+              .card.border-0.shadow-sm.text-center.p-3(style="width: 160px; background-color: var(--bg-surface);")
+                if u.avatarUrl
+                  img.rounded-circle.mx-auto.mb-2(src=u.avatarUrl alt="Avatar" style="width: 80px; height: 80px; object-fit: cover;")
+                else
+                  .d-flex.justify-content-center.align-items-center.rounded-circle.mx-auto.mb-2(style="width: 80px; height: 80px; background-color: var(--bg-main); color: var(--text-muted);")
+                    i.bi.bi-person-fill.fs-1
+                a.text-decoration-none.fw-bold(href=`/profile/${u.id}` style="color: inherit;") #{u.username}
+
+    if posts && posts.length > 0
+      .row.mb-4
+        .col-12
+          h4.fw-bold.mb-3 Publicaciones encontradas
+      
+      .row.justify-content-center
+        .col-12.col-md-8.col-lg-6
+          .d-flex.flex-column.gap-5.mb-5
+            each post in posts
+              .card.border-0.post-card
+                .card-header.bg-transparent.border-0.d-flex.align-items-center.py-3
+                  a.d-flex.align-items-center.text-decoration-none(href=`/profile/${post.userId}` style="color: inherit;")
+                    if post.user && post.user.avatarUrl
+                      img.rounded-circle.me-3(src=post.user.avatarUrl alt="Avatar" width="40" height="40" style="object-fit: cover;")
+                    else
+                      i.bi.bi-person-circle.fs-2.me-3(style="color: var(--text-muted);")
+                    span.fw-bold #{post.user ? post.user.username : 'Usuario'}
+                
+                - const imgSrc = (post.image && post.image.filePath) ? post.image.filePath : `https://picsum.photos/600/600?random=${post.id}`
+                - const isOwner = user && post.userId === user.id
+                - const hasPurchased = post.purchases && post.purchases.length > 0
+                - const isLocked = post.forSale && post.price > 0 && !isOwner && !hasPurchased
+                
+                .position-relative
+                  img.card-img-top.rounded-0(src=imgSrc alt="Post image" style=`object-fit: cover; max-height: 600px; ${isLocked ? 'filter: blur(25px); pointer-events: none;' : ''}`)
+                  if isLocked
+                    .position-absolute.top-50.start-50.translate-middle.text-center.w-100
+                      form(action=`/posts/buy/${post.id}` method="POST")
+                        button.btn.btn-lg.fw-bold.shadow(type="submit" style="background-color: var(--accent); color: white; border: none; border-radius: 30px; padding: 12px 30px;")
+                          i.bi.bi-unlock-fill.me-2
+                          | Desbloquear por $#{post.price}
+
+                .card-body
+                  .d-flex.justify-content-between.align-items-center.mb-3
+                    .d-flex.align-items-center.gap-4
+                      
+                      form(action=`/posts/rate/${post.id}` method="POST").rating-container.d-flex.flex-row-reverse.align-items-center.m-0
+                        span.ms-2.text-muted.small (#{post.image && post.image.averageRating ? post.image.averageRating.toFixed(1) : '0.0'})
+                        - const userRating = post.ratings && post.ratings.length > 0 ? post.ratings[0].value : 0
+                        each star in [5, 4, 3, 2, 1]
+                          button.bi.bi-heart-fill.rating-heart.fs-5.px-1(type="submit" name="rating" value=star style=`background:none; border:none; padding:0; cursor:pointer; ${star <= userRating ? 'color: var(--accent);' : ''}` title=`Dar ${star} puntos`)
+
+                      i.bi.bi-chat-dots.comment-btn.fs-5(style="cursor: pointer;" onclick=`document.getElementById('comment-input-${post.id}').focus()`)
+                    div
+                      span.badge.me-2(style="background-color: var(--accent)") Fotografía
+                      if post.forSale
+                        span.badge.bg-success.me-2 En Venta
+                        span.text-success.fw-bold $#{post.price}
+                  
+                  p.mb-1
+                    a.text-decoration-none.fw-bold.me-2(href=`/profile/${post.userId}` style="color: inherit;") #{post.user ? post.user.username : 'Usuario'}
+                  p.mb-1 #{post.title}
+                  p.card-text.text-muted.mb-2 #{post.descriptionText}
+    
+    if (!users || users.length === 0) && (!posts || posts.length === 0)
+      .alert.text-center.border-0.shadow-sm(style="background-color: var(--bg-surface); color: var(--text-main); border-radius: 12px; padding: 3rem 1rem;")
+        i.bi.bi-search.fs-1.mb-3.d-block(style="color: var(--text-muted);")
+        h4.fw-bold No encontramos resultados
+        p.text-muted Intentá buscando con otros nombres de usuarios, palabras clave o "#tags".
