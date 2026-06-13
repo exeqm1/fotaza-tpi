@@ -1,0 +1,24 @@
+extends layouts/main.pug
+
+block content
+  .row.justify-content-center.align-items-center(style="min-height: 70vh;")
+    .col-12.col-md-6.col-lg-4
+      .card.border-0.shadow-lg(style="background-color: var(--bg-surface);")
+        .card-body.p-4.p-md-5
+          h2.text-center.fw-bold.mb-4 Iniciar Sesión
+          
+          form(action="/auth/login" method="POST")
+            .mb-3
+              label.form-label.text-muted(for="username") Usuario o Correo
+              input#username.form-control.border-secondary(type="text" name="username" required placeholder="Ingresá tu usuario o email")
+            
+            .mb-4
+              label.form-label.text-muted(for="password") Contraseña
+              input#password.form-control.border-secondary(type="password" name="password" required placeholder="••••••••")
+            
+            .d-grid
+              button.btn.btn-primary.fw-bold.py-2(type="submit" style="background-color: var(--accent); border-color: var(--accent);") Ingresar
+          
+          .text-center.mt-4
+            p.mb-0.text-muted ¿No tenés cuenta? 
+              a.fw-bold.text-primary(href="/register") Registrate acá

@@ -1,46 +1,71 @@
 extends layouts/main.pug
 
 block content
-  .container(style="max-width: 930px;")
-    
-    .row.mb-5.align-items-center
-      .col-12.col-md-4.text-center.mb-4.mb-md-0
-        img.rounded-circle.img-fluid(src="https://i.pravatar.cc/150?u=fotaza" alt="Avatar" style="width: 150px; height: 150px; object-fit: cover; border: 3px solid var(--accent); padding: 3px;")
+  .container
+
+    - const coverColors = ['#2D2A3E', '#1F2937', '#2A2438', '#1C2B36', '#302430', '#212A2F'];
+    - const userIndex = profileUser && profileUser.username ? profileUser.username.charCodeAt(0) : 2;
+    - const defaultCover = coverColors[userIndex % coverColors.length];
+
+    .position-relative.mb-5
+      if profileUser && profileUser.coverUrl
+        img.w-100.rounded-4.shadow-sm(src=profileUser.coverUrl style="height: 250px; object-fit: cover; filter: brightness(0.8);" alt="Portada de Perfil")
+      else
+        .w-100.rounded-4.shadow-sm(style=`height: 250px; background-color: ${defaultCover};`)
       
-      .col-12.col-md-8
-        .d-flex.align-items-center.mb-3.flex-wrap.gap-3
-          h2.fw-bold.mb-0 Usuario123
-          button.btn.btn-sm.px-3.fw-bold(style="background-color: var(--text-main); color: var(--bg-main); border-radius: 8px;") Seguir
-          button.btn.btn-sm.btn-outline-secondary.border-0.fs-5 ⚙️
-        
-        .d-flex.gap-4.mb-3
-          div
-            span.fw-bold.fs-5 12
-            |  publicaciones
-          div
-            span.fw-bold.fs-5 340
-            |  seguidores
-          div
-            span.fw-bold.fs-5 180
-            |  seguidos
-            
-        div
-          p.fw-bold.mb-1 Nombre Real
-          p.mb-0 Fotógrafo amateur 📸 | Capturando momentos alrededor del mundo.
-          a.text-decoration-none.fw-bold(href="#" style="color: var(--accent);") linktr.ee/usuario123
+      .position-absolute.top-100.start-50.translate-middle
+        if profileUser && profileUser.avatarUrl
+          img.rounded-circle.shadow-lg(src=profileUser.avatarUrl alt="Avatar" style="width: 140px; height: 140px; object-fit: cover; border: 6px solid var(--bg-main); background-color: var(--bg-main);")
+        else
+          .d-flex.justify-content-center.align-items-center.rounded-circle.shadow-lg(style="width: 140px; height: 140px; border: 6px solid var(--bg-main); background-color: var(--bg-surface); color: var(--text-muted); margin: 0;")
+            i.bi.bi-person-fill(style="font-size: 80px;")
 
-    ul.nav.nav-tabs.justify-content-center.mb-4.border-bottom-0(style="border-top: 1px solid var(--border-light);")
-      li.nav-item
-        a.nav-link.active.bg-transparent.border-0.border-top.border-2.rounded-0.fw-bold.py-3(href="#" style="color: var(--text-main) !important; border-top-color: var(--text-main) !important;") 
-          i.bi.bi-grid-3x3.me-2
-          | PUBLICACIONES
-      li.nav-item
-        a.nav-link.border-0.text-muted.py-3(href="#") 
-          i.bi.bi-bookmark.me-2
-          | COLECCIONES
 
-    .row.g-1
-      each val in [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        .col-4
-          a.ratio.ratio-1x1.d-block(href="#")
-            img.object-fit-cover(src=`https://picsum.photos/seed/${val * 25}/500/500` alt=`Post ${val}` style="transition: opacity 0.3s ease;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1")
+    .text-center.mt-5.pt-3.mb-4
+      h2.fw-bold.mb-1 #{profileUser.username}
+      p.text-muted.mb-3 #{profileUser.bio || '¡Hola! Estoy usando Fotaza para compartir mi arte.'}
+      a.text-decoration-none.d-block.mb-3.text-primary(href="#") 
+      
+      .d-flex.justify-content-center.gap-2
+        if user && profileUser.id === user.id
+          a.btn.btn-sm.btn-outline-secondary.px-3(href="/profile/edit" title="Editar Perfil" style="border-radius: 20px;") Editar perfil
+        else
+          button.btn.btn-sm.px-4.fw-bold(style="background-color: var(--text-main); color: var(--bg-main); border-radius: 20px;" disabled) Seguir
+
+
+    .row.justify-content-center.mb-5
+      .col-12.col-md-8.col-lg-6
+        .card.border-0.shadow-lg(style="background-color: var(--bg-surface); border-radius: 24px;")
+          .card-body.d-flex.justify-content-around.py-3
+            .text-center
+              h4.fw-bold.mb-0 #{profileUser.posts ? profileUser.posts.length : 0}
+              span.text-muted.small.fw-bold PUBLICACIONES
+            .text-center
+              h4.fw-bold.mb-0 #{profileUser.followers ? profileUser.followers.length : 0}
+              span.text-muted.small.fw-bold SEGUIDORES
+            .text-center
+              h4.fw-bold.mb-0 #{profileUser.following ? profileUser.following.length : 0}
+              span.text-muted.small.fw-bold SEGUIDOS
+
+    //- Cabecera de la Galería
+    .d-flex.justify-content-between.align-items-center.mb-4
+      h4.fw-bold.mb-0 Portfolio
+      select.form-select.form-select-sm.w-auto.bg-transparent.text-muted.border-secondary
+        option(selected) Más recientes
+        option Populares
+
+    //- Galería de Trabajos (Grid más espaciado y moderno)
+    .row.g-4.mb-5
+      if profileUser.posts && profileUser.posts.length > 0
+        each post in profileUser.posts
+          .col-12.col-sm-6.col-md-4
+            a.ratio.ratio-1x1.d-block.rounded-4.overflow-hidden.shadow-sm(href=`#`)
+              - const postImg = (post.image && post.image.filePath) ? post.image.filePath : `https://picsum.photos/600/600?random=${post.id}`
+              img.object-fit-cover(src=postImg alt=`Post ${post.id}` style="transition: transform 0.4s ease, filter 0.4s ease;" onmouseover="this.style.transform='scale(1.08)'; this.style.filter='brightness(0.7)';" onmouseout="this.style.transform='scale(1)'; this.style.filter='brightness(1)';")
+      else
+        .col-12.text-center.py-5
+          p.text-muted Todavía no hay publicaciones.
+
+    if user
+      a.btn.btn-primary.position-fixed.bottom-0.end-0.m-4.rounded-circle.shadow-lg.d-flex.justify-content-center.align-items-center(href="/posts/create" style="width: 60px; height: 60px; background-color: var(--accent); border: none; z-index: 1000;" title="Subir Foto")
+        i.bi.bi-plus-lg.fs-3

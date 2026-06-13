@@ -1,0 +1,40 @@
+extends layouts/main.pug
+
+block content
+  .container
+    .row.mb-4
+      .col
+        h1.fw-bold Panel de Moderación
+        p.text-muted Gestioná los reportes y el estado de la comunidad.
+
+    .row
+      .col-12
+        .card.border-0.shadow-lg(style="background-color: var(--bg-surface);")
+          .card-body.p-4
+            h4.fw-bold.mb-4 Reportes Pendientes
+            
+            .table-responsive
+              table.table.table-striped.table-hover.align-middle
+                thead
+                  tr
+                    th ID
+                    th Usuario Reportado
+                    th Motivo del Reporte
+                    th Fecha
+                    th Acciones
+                tbody
+                  each val in [1, 2, 3]
+                    tr
+                      td ##{val * 1024}
+                      td.fw-bold UsuarioMalicioso#{val}
+                      td Spam / Contenido Inapropiado
+                      td Hace #{val} horas
+                      td
+                        .d-flex.align-items-center
+                          form(action=`/admin/strike/${val}` method="POST" class="m-0 p-0")
+                            button.btn.btn-sm.btn-danger.me-2(title="Aplicar Strike / Banear" type="submit")
+                              i.bi.bi-hammer.me-1
+                              | Sancionar
+                        button.btn.btn-sm.btn-success(title="Desestimar Reporte")
+                          i.bi.bi-check-lg.me-1
+                          | Ignorar

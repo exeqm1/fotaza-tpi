@@ -7,30 +7,109 @@ block content
         h1.fw-bold.mb-2 Explorar Feed
         p.text-muted Descubrí las mejores fotografías de nuestra comunidad.
 
+    if query && users && users.length > 0
+      .row.justify-content-center.mb-4
+        .col-12.col-md-8.col-lg-6
+          h5.fw-bold.mb-3 Usuarios encontrados
+          .d-flex.flex-wrap.gap-3
+            each u in users
+              .card.border-0.shadow-sm.text-center.p-3(style="width: 140px; background-color: var(--bg-surface);")
+                if u.avatarUrl
+                  img.rounded-circle.mx-auto.mb-2(src=u.avatarUrl alt="Avatar" style="width: 60px; height: 60px; object-fit: cover;")
+                else
+                  .d-flex.justify-content-center.align-items-center.rounded-circle.mx-auto.mb-2(style="width: 60px; height: 60px; background-color: var(--bg-main); color: var(--text-muted);")
+                    i.bi.bi-person-fill.fs-3
+                a.text-decoration-none.fw-bold(href=`/profile/${u.id}` style="color: inherit;") #{u.username}
+
     .row.justify-content-center
       .col-12.col-md-8.col-lg-6
         .d-flex.flex-column.gap-5.mb-5
-          each val in [1, 2, 3, 4, 5, 6]
-            .card.border-0.post-card
-              .card-header.bg-transparent.border-0.d-flex.align-items-center.py-3
-                img.rounded-circle.me-3(src=`https://i.pravatar.cc/150?u=${val}` alt="Avatar" width="40" height="40")
-                span.fw-bold Usuario#{val}
-              
-              img.card-img-top.rounded-0(src=`https://picsum.photos/seed/${val * 10}/600/600` alt="Post image" style="object-fit: cover; max-height: 600px;")
-              
-              .card-body
-                .d-flex.justify-content-between.align-items-center.mb-3
-                  div
-                    i.bi.bi-heart-fill.like-btn(id="likeBtn")
-                    i.bi.bi-chat-dots.comment-btn(id="commentBtn")
-                  div
-                    span.badge.me-2(style="background-color: var(--accent)") Fotografía
-                    if val % 2 === 0
-                      span.badge.bg-success En Venta $#{val * 150}
+          if posts && posts.length > 0
+            each post in posts
+              .card.border-0.post-card
+                .card-header.bg-transparent.border-0.d-flex.align-items-center.py-3
+                  a.d-flex.align-items-center.text-decoration-none(href=`/profile/${post.userId}` style="color: inherit;")
+                    if post.user && post.user.avatarUrl
+                      img.rounded-circle.me-3(src=post.user.avatarUrl alt="Avatar" width="40" height="40" style="object-fit: cover;")
+                    else
+                      i.bi.bi-person-circle.fs-2.me-3(style="color: var(--text-muted);")
+                    span.fw-bold #{post.user ? post.user.username : 'Usuario'}
                 
-                p.fw-bold.mb-1 #{val * 12} Me gusta
+                - const isOwner = user && post.userId === user.id
+                - const hasPurchased = post.purchases && post.purchases.length > 0
+                - const isLocked = post.forSale && post.price > 0 && !isOwner && !hasPurchased
+                - const images = Array.isArray(post.image) ? post.image : (post.image ? [post.image] : [])
                 
-                p.card-text.mb-1
-                  span.fw-bold.me-2 Usuario#{val}
-                  | Fotaza Título #{val} - Un pequeño texto de descripción para simular lo que escribió el autor en esta publicación.
-                p.text-muted.small.mb-0 HACE 2 HORAS
+                .position-relative
+                  if images.length > 1
+                    div.carousel.slide(id=`carousel-${post.id}` data-bs-theme="dark")
+                      div.carousel-inner
+                        each img, index in images
+                          div.carousel-item(class=(index === 0 ? 'active' : ''))
+                            img.card-img-top.rounded-0(src=img.filePath alt="Post image" style=`object-fit: cover; max-height: 600px; ${isLocked ? 'filter: blur(25px); pointer-events: none;' : ''}`)
+                      button.carousel-control-prev(type="button" data-bs-target=`#carousel-${post.id}` data-bs-slide="prev")
+                        span.carousel-control-prev-icon(aria-hidden="true")
+                      button.carousel-control-next(type="button" data-bs-target=`#carousel-${post.id}` data-bs-slide="next")
+                        span.carousel-control-next-icon(aria-hidden="true")
+                  else if images.length === 1
+                    img.card-img-top.rounded-0(src=images[0].filePath alt="Post image" style=`object-fit: cover; max-height: 600px; ${isLocked ? 'filter: blur(25px); pointer-events: none;' : ''}`)
+                  else
+                    img.card-img-top.rounded-0(src=`https://picsum.photos/600/600?random=${post.id}` alt="Post image" style=`object-fit: cover; max-height: 600px; ${isLocked ? 'filter: blur(25px); pointer-events: none;' : ''}`)
+
+                  if isLocked
+                    .position-absolute.top-50.start-50.translate-middle.text-center.w-100
+                      form(action=`/posts/buy/${post.id}` method="POST")
+                        button.btn.btn-primary.btn-lg.fw-bold.shadow(type="submit" style="border-radius: 30px; padding: 12px 30px;")
+                          i.bi.bi-unlock-fill.me-2
+                          | Desbloquear por $#{post.price}
+
+                .card-body
+                  .d-flex.justify-content-between.align-items-center.mb-3
+                    .d-flex.align-items-center.gap-4
+                      
+                      form(action=`/posts/rate/${post.id}` method="POST").rating-container.d-flex.flex-row-reverse.align-items-center.m-0
+                        span.ms-2.text-muted.small (#{post.image && post.image.averageRating ? post.image.averageRating.toFixed(1) : '0.0'})
+                        - const userRating = post.ratings && post.ratings.length > 0 ? post.ratings[0].value : 0
+                        each star in [5, 4, 3, 2, 1]
+                          button.bi.bi-heart-fill.rating-heart.fs-5.px-1(type="submit" name="rating" value=star style=`background:none; border:none; padding:0; cursor:pointer; ${star <= userRating ? 'color: #dc3545;' : ''}` title=`Dar ${star} puntos`)
+
+                      i.bi.bi-chat-dots.comment-btn.fs-5(style="cursor: pointer;" onclick=`document.getElementById('comment-input-${post.id}').focus()`)
+                    div
+                      span.badge.bg-primary.me-2 Fotografía
+                      if post.forSale
+                        span.badge.bg-success.me-2 En Venta
+                        span.text-success.fw-bold $#{post.price}
+                  
+                  p.mb-1
+                    a.text-decoration-none.fw-bold.me-2(href=`/profile/${post.userId}` style="color: inherit;") #{post.user ? post.user.username : 'Usuario'}
+                  p.mb-1 #{post.title}
+                  p.card-text.text-muted.mb-2 #{post.descriptionText}
+                  p.text-muted.small.mb-0 #{new Date(post.date).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+
+                  .comments-section.mt-3.pt-3.border-top
+                    if post.comments && post.comments.length > 0
+                      each comment in post.comments
+                        .d-flex.mb-2.align-items-start
+                          if comment.user && comment.user.avatarUrl
+                            img.rounded-circle.me-2(src=comment.user.avatarUrl alt="Avatar" width="30" height="30" style="object-fit: cover;")
+                          else
+                            i.bi.bi-person-circle.fs-4.me-2(style="color: var(--text-muted); line-height: 1;")
+                          div
+                            span.fw-bold.me-2.small #{comment.user ? comment.user.username : 'Usuario'}
+                            span.small #{comment.content}
+                    else
+                      p.text-muted.small No hay comentarios todavía. Sé el primero en comentar.
+                    
+                    if user
+                      form.d-flex.mt-3(action=`/posts/comment/${post.id}` method="POST")
+                        input.form-control.form-control-sm.me-2.border-secondary(id=`comment-input-${post.id}` type="text" name="content" placeholder="Agregar un comentario..." required)
+                        button.btn.btn-sm.btn-primary.fw-bold(type="submit") Publicar
+          else
+            .alert.text-center.border-0.shadow-sm(style="background-color: var(--bg-surface); color: var(--text-main); border-radius: 12px; padding: 3rem 1rem;")
+              i.bi.bi-camera.fs-1.mb-3.d-block(style="color: var(--text-muted);")
+              h4.fw-bold No hay publicaciones disponibles
+              p.text-muted Todavía no hay fotos en nuestra comunidad. ¡Animate a subir la primera!
+
+    if user
+      a.btn.btn-primary.position-fixed.bottom-0.end-0.m-4.rounded-circle.shadow-lg.d-flex.justify-content-center.align-items-center(href="/posts/create" style="width: 60px; height: 60px; z-index: 1000;" title="Subir Foto")
+        i.bi.bi-plus-lg.fs-3

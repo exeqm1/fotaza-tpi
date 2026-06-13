@@ -1,0 +1,30 @@
+extends layouts/main.pug
+
+block content
+  .row.justify-content-center
+    .col-12.col-md-8.col-lg-6
+      .card.border-0.shadow-lg(style="background-color: var(--bg-surface);")
+        .card-body.p-4.p-md-5
+          h2.fw-bold.mb-4.text-center Editar Perfil
+          
+          form(action="/profile/edit" method="POST" enctype="multipart/form-data")
+            .mb-3
+              label.form-label.text-muted(for="username") Nombre de Usuario
+              input#username.form-control.border-secondary(type="text" name="username" value=profileUser.username required)
+            
+            .mb-3
+              label.form-label.text-muted(for="bio") Biografía
+              textarea#bio.form-control.border-secondary(name="bio" rows="3" placeholder="Contanos algo sobre vos...") #{profileUser.bio || ''}
+            
+            .mb-3
+              label.form-label.text-muted(for="avatar") Foto de Perfil
+              input#avatar.form-control.border-secondary(type="file" name="avatar" accept="image/*")
+              small.text-muted Se reemplazará tu foto actual.
+            
+            .mb-4
+              label.form-label.text-muted(for="cover") Foto de Portada
+              input#cover.form-control.border-secondary(type="file" name="cover" accept="image/*")
+              small.text-muted Se reemplazará tu portada actual.
+            
+            .d-grid.mt-4
+              button.btn.btn-primary.btn-lg.fw-bold(type="submit") Guardar Cambios

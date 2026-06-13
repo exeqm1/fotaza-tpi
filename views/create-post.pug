@@ -1,0 +1,32 @@
+extends layouts/main.pug
+
+block content
+  .row.justify-content-center
+    .col-12.col-md-8.col-lg-6
+      .card.border-0.shadow-lg(style="background-color: var(--bg-surface);")
+        .card-body.p-4.p-md-5
+          h2.fw-bold.mb-4.text-center Nueva Publicación
+          
+          form(action="/posts/create" method="POST" enctype="multipart/form-data")
+            .mb-4
+              label.form-label.text-muted(for="images") Seleccionar Fotografía/s (Máximo 5)
+              input#image.form-control.border-secondary(type="file" name="images" accept="image/*" multiple max="5" required)
+            
+            .mb-3
+              label.form-label.text-muted(for="title") Título de la obra
+              input#title.form-control.border-secondary(type="text" name="title" required placeholder="Ej: Atardecer en la montaña")
+            
+            .mb-3
+              label.form-label.text-muted(for="desc") Descripción
+              textarea#desc.form-control.border-secondary(name="desc" rows="4" placeholder="Contanos sobre esta foto...")
+            
+            .mb-4
+              label.form-label.text-muted(for="price") Precio (Dejar en 0 si no está a la venta)
+              .input-group
+                span.input-group-text.border-secondary $
+                input#price.form-control.border-secondary(type="number" name="price" step="0.01" min="0" value="0.00" placeholder="0.00")
+            
+            .d-grid.mt-5
+              button.btn.btn-primary.btn-lg.fw-bold(type="submit") 
+                i.bi.bi-cloud-arrow-up.me-2
+                | Publicar Fotografía

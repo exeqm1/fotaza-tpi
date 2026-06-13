@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
             unique: true
         },
         password: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(255),
             allowNull: false
         },
         role: {
@@ -34,6 +34,11 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true,
             field: 'avatar_path'
+        },
+        coverUrl: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            field: 'cover_path'
         },
         bio: {
             type: DataTypes.STRING(100),
