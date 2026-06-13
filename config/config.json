@@ -1,9 +1,10 @@
 {
   "development": {
     "username": "root",
-    "password": null,
-    "database": "fotaza_db",
-    "host": "127.0.0.1",
+    "password": "EODyOOwqTstNFQfNchLSESiOoPbuUJjB",
+    "database": "railway",
+    "host": "thomas.proxy.rlwy.net",
+    "port": 41023,
     "dialect": "mysql"
   },
   "test": {
@@ -15,9 +16,10 @@
   },
   "production": {
     "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
+    "password": "EODyOOwqTstNFQfNchLSESiOoPbuUJjB",
+    "database": "railway",
+    "host": "thomas.proxy.rlwy.net",
+    "port": 41023,
     "dialect": "mysql"
   }
 }

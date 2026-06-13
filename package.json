@@ -17,6 +17,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "db:init": "mysql -u root -p < database_init.sql"
+    "db:init": "mysql -h thomas.proxy.rlwy.net -P 41023 -u root -pEODyOOwqTstNFQfNchLSESiOoPbuUJjB railway < database_init.sql"
   }
 }
