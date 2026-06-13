@@ -46,10 +46,10 @@ block content
             .text-center
               h4.fw-bold.mb-0 #{profileUser.posts ? profileUser.posts.length : 0}
               span.text-muted.small.fw-bold PUBLICACIONES
-            .text-center
+            .text-center(style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#followersModal")
               h4.fw-bold.mb-0 #{profileUser.followers ? profileUser.followers.length : 0}
               span.text-muted.small.fw-bold SEGUIDORES
-            .text-center
+            .text-center(style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#followingModal")
               h4.fw-bold.mb-0 #{profileUser.following ? profileUser.following.length : 0}
               span.text-muted.small.fw-bold SEGUIDOS
 
@@ -101,3 +101,43 @@ block content
                         span.fw-bold.fs-5(style="color: white; line-height: 1;") &gt;
                   else
                     img.img-fluid(src=images[0].filePath alt="Post image" style="max-height: 90vh; object-fit: contain;")
+
+    if profileUser.followers
+      .modal.fade(id="followersModal" tabindex="-1")
+        .modal-dialog.modal-dialog-centered.modal-dialog-scrollable
+          .modal-content(style="background-color: var(--bg-surface);")
+            .modal-header.border-secondary
+              h5.modal-title.fw-bold Seguidores
+              button.btn-close.btn-close-white(type="button" data-bs-dismiss="modal")
+            .modal-body
+              if profileUser.followers.length > 0
+                .list-group
+                  each follower in profileUser.followers
+                    a.list-group-item.list-group-item-action.d-flex.align-items-center.bg-transparent.border-secondary(href=`/profile/${follower.id}` style="color: inherit;")
+                      if follower.avatarUrl
+                        img.rounded-circle.me-3(src=follower.avatarUrl width="40" height="40" style="object-fit: cover;")
+                      else
+                        i.bi.bi-person-circle.fs-3.me-3(style="color: var(--text-muted);")
+                      span.fw-bold #{follower.username}
+              else
+                p.text-muted.text-center.my-3 No tiene seguidores aún.
+
+    if profileUser.following
+      .modal.fade(id="followingModal" tabindex="-1")
+        .modal-dialog.modal-dialog-centered.modal-dialog-scrollable
+          .modal-content(style="background-color: var(--bg-surface);")
+            .modal-header.border-secondary
+              h5.modal-title.fw-bold Seguidos
+              button.btn-close.btn-close-white(type="button" data-bs-dismiss="modal")
+            .modal-body
+              if profileUser.following.length > 0
+                .list-group
+                  each followed in profileUser.following
+                    a.list-group-item.list-group-item-action.d-flex.align-items-center.bg-transparent.border-secondary(href=`/profile/${followed.id}` style="color: inherit;")
+                      if followed.avatarUrl
+                        img.rounded-circle.me-3(src=followed.avatarUrl width="40" height="40" style="object-fit: cover;")
+                      else
+                        i.bi.bi-person-circle.fs-3.me-3(style="color: var(--text-muted);")
+                      span.fw-bold #{followed.username}
+              else
+                p.text-muted.text-center.my-3 No sigue a nadie aún.

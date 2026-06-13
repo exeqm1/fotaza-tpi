@@ -61,8 +61,17 @@ const getFeed = async (req, res) => {
                 where: { postId: postIds },
                 attributes: ['postId', 'filePath', 'averageRating']
             });
+            
+            const allTags = await db.sequelize.query(
+                'SELECT pt.post_id, t.title FROM Post_Tags pt JOIN Tags t ON pt.tag_id = t.tag_id WHERE pt.post_id IN (:postIds)',
+                { replacements: { postIds: postIds }, type: db.sequelize.QueryTypes.SELECT }
+            ).catch(() => []);
+
             posts.forEach(post => {
-                post.dataValues.imagesList = allImages.filter(img => img.postId === post.id);
+                post.dataValues.imagesList = allImages.filter(img => img.postId === post.id || (img.dataValues && img.dataValues.postId === post.id));
+                post.imagesList = post.dataValues.imagesList;
+                post.dataValues.tagsList = allTags.filter(t => t.post_id === post.id).map(t => t.title);
+                post.tagsList = post.dataValues.tagsList;
             });
         }
 
@@ -87,7 +96,7 @@ const getCreateForm = (req, res) => {
 
 const createPost = async (req, res) => {
     try {
-        const { title, desc, price } = req.body;
+        const { title, desc, price, tags } = req.body;
         
         if (!req.files || req.files.length === 0) {
             return res.status(400).render('error', { message: 'Es obligatorio subir al menos una imagen.' });
@@ -109,6 +118,30 @@ const createPost = async (req, res) => {
                 filePath: '/uploads/' + file.filename,
                 licenseType: 'COPYRIGHT'
             });
+        }
+
+        if (tags && tags.trim() !== '') {
+            const tagArray = tags.split(',').map(t => t.trim().toLowerCase()).filter(t => t !== '').slice(0, 5);
+            for (const tagName of tagArray) {
+                try {
+                    await db.sequelize.query(
+                        'INSERT IGNORE INTO Tags (title) VALUES (:title)',
+                        { replacements: { title: tagName }, type: db.sequelize.QueryTypes.INSERT }
+                    );
+                    const [tagRecords] = await db.sequelize.query(
+                        'SELECT tag_id FROM Tags WHERE title = :title LIMIT 1',
+                        { replacements: { title: tagName }, type: db.sequelize.QueryTypes.SELECT }
+                    );
+                    if (tagRecords && tagRecords.tag_id) {
+                        await db.sequelize.query(
+                            'INSERT IGNORE INTO Post_Tags (post_id, tag_id) VALUES (:postId, :tagId)',
+                            { replacements: { postId: newPost.id, tagId: tagRecords.tag_id }, type: db.sequelize.QueryTypes.INSERT }
+                        );
+                    }
+                } catch (err) {
+                    console.error('Error al guardar tag:', err);
+                }
+            }
         }
 
         res.redirect('/posts');

@@ -19,6 +19,8 @@ const getProfile = async (req, res) => {
         if (!user) return res.status(404).render('error', { message: 'Usuario no encontrado' });
 
         if (user.posts && user.posts.length > 0) {
+            user.posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
             const postIds = user.posts.map(p => p.id);
             const allImages = await db.Image.findAll({ where: { postId: postIds } });
             user.posts.forEach(post => {

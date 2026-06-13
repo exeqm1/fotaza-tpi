@@ -58,7 +58,7 @@ block content
 
                 - const hasPurchased = post.purchases && post.purchases.length > 0
                 - const isLocked = post.forSale && post.price > 0 && !isOwner && !hasPurchased
-                - const images = post.imagesList && post.imagesList.length > 0 ? post.imagesList : (Array.isArray(post.image) ? post.image : (post.image ? [post.image] : []))
+                - const images = (post.dataValues && post.dataValues.imagesList && post.dataValues.imagesList.length > 0) ? post.dataValues.imagesList : (post.imagesList && post.imagesList.length > 0 ? post.imagesList : (Array.isArray(post.image) ? post.image : (post.image ? [post.image] : [])))
                 
                 .position-relative
                   if images.length > 1
@@ -91,7 +91,7 @@ block content
                         span.ms-2.text-muted.small (#{images.length > 0 && images[0].averageRating ? images[0].averageRating.toFixed(1) : '0.0'})
                         - const userRating = post.ratings && post.ratings.length > 0 ? post.ratings[0].value : 0
                         each star in [5, 4, 3, 2, 1]
-                          button.bi.bi-heart-fill.rating-heart.fs-5.px-1(type="submit" name="rating" value=star style=`background:none; border:none; padding:0; cursor:pointer; ${star <= userRating ? 'color: #dc3545;' : ''}` title=`Dar ${star} puntos`)
+                          button.rating-heart.fs-5.px-1(type="submit" name="rating" value=star class=(star <= userRating ? 'bi bi-heart-fill text-danger' : 'bi bi-heart') style="background:none; border:none; padding:0; cursor:pointer;" title=`Dar ${star} puntos`)
 
                       i.bi.bi-chat-dots.comment-btn.fs-5(style="cursor: pointer;" onclick=`document.getElementById('comment-input-${post.id}').focus()`)
                     div.d-flex.align-items-center
@@ -109,6 +109,11 @@ block content
                     a.text-decoration-none.fw-bold.me-2(href=`/profile/${post.userId}` style="color: inherit;") #{post.user ? post.user.username : 'Usuario'}
                   p.mb-1 #{post.title}
                   p.card-text.text-muted.mb-2 #{post.descriptionText}
+                  - const postTags = post.tagsList || (post.dataValues && post.dataValues.tagsList) || []
+                  if postTags.length > 0
+                    .mb-2
+                      each tag in postTags
+                        span.badge.bg-secondary.me-1 ##{tag}
                   p.text-muted.small.mb-0 #{new Date(post.date).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
 
                   .comments-section.mt-3.pt-3.border-top
