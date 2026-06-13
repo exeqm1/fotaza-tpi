@@ -114,6 +114,18 @@ app.post('/admin/strike/:id', requireAdmin, async (req, res) => {
     }
 });
 
+app.post('/admin/report/:id/status', requireAdmin, async (req, res) => {
+    try {
+        const report = await db.Report.findByPk(req.params.id);
+        if (report) {
+            await report.update({ status: req.body.status });
+        }
+        res.redirect('/admin');
+    } catch (error) {
+        res.status(500).render('error', { message: 'Error al actualizar el reporte.' });
+    }
+});
+
 app.use((req, res) => {
     res.status(404).render('error', { message: 'La página que estás buscando no existe o fue eliminada.' });
 });

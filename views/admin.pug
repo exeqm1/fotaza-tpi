@@ -11,8 +11,53 @@ block content
       .col-12
         .card.border-0.shadow-lg(style="background-color: var(--bg-surface);")
           .card-body.p-4
-            h4.fw-bold.mb-4 Reportes Pendientes
+            h4.fw-bold.mb-4 Panel de Reportes
             
+            if reports && reports.length > 0
+              .table-responsive.mb-5
+                table.table.table-striped.table-hover.align-middle
+                  thead
+                    tr
+                      th ID
+                      th Tipo
+                      th Motivo
+                      th Estado
+                      th Fecha
+                      th Acciones
+                  tbody
+                    each report in reports
+                      tr
+                        td ##{report.id}
+                        td 
+                          span.badge.bg-secondary #{report.contentType}
+                        td #{report.reason}
+                        td 
+                          if report.status === 'PENDING'
+                            span.badge.bg-warning.text-dark PENDIENTE
+                          else if report.status === 'APPROVED'
+                            span.badge.bg-success APROBADO
+                          else
+                            span.badge.bg-danger RECHAZADO
+                        td #{new Date(report.date).toLocaleDateString('es-AR')}
+                        td
+                          if report.status === 'PENDING'
+                            form(action=`/admin/report/${report.id}/status` method="POST" class="d-inline me-2")
+                              input(type="hidden" name="status" value="APPROVED")
+                              button.btn.btn-sm.btn-success(title="Aprobar" type="submit")
+                                i.bi.bi-check-lg
+                            form(action=`/admin/report/${report.id}/status` method="POST" class="d-inline")
+                              input(type="hidden" name="status" value="REJECTED")
+                              button.btn.btn-sm.btn-danger(title="Rechazar" type="submit")
+                                i.bi.bi-x-lg
+                          else
+                            span.text-muted Resuelto
+            else
+              .alert.alert-light.text-center.border-0.shadow-sm.py-4.mb-5
+                i.bi.bi-check-circle.fs-2.text-success.mb-2.d-block
+                h5.text-muted No hay reportes pendientes.
+
+            h4.fw-bold.mb-4 Gestión de Usuarios
+
             .table-responsive
               table.table.table-striped.table-hover.align-middle
                 thead

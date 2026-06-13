@@ -20,6 +20,11 @@ block content
               label.form-label.text-muted(for="desc") Descripción
               textarea#desc.form-control.border-secondary(name="desc" rows="4" placeholder="Contanos sobre esta foto...")
             
+            .mb-3
+              label.form-label.text-muted(for="tags") Etiquetas / Tags (Opcional)
+              input#tags.form-control.border-secondary.bg-transparent(type="text" name="tags" placeholder="ej: paisaje, atardecer, viaje")
+              .form-text.text-muted Podés escribir hasta 5 etiquetas separadas por comas.
+            
             .mb-4
               label.form-label.text-muted(for="price") Precio (Dejar en 0 si no está a la venta)
               .input-group

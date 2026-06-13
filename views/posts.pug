@@ -99,16 +99,17 @@ block content
                       if post.forSale
                         span.badge.bg-dark.text-light.border.border-secondary En Venta
                         span.text-success.fw-bold $#{post.price}
-                  
-                  .mt-2.mb-3
-                    a.text-decoration-none.fw-bold.me-2.fs-5(href=`/profile/${post.userId}` style="color: inherit;") #{post.user ? post.user.username : 'Usuario'}
-                    h5.fw-bold.mb-1.mt-2 #{post.title}
-                    p.card-text.text-muted.mb-3 #{post.descriptionText}
+
                   - const postTags = post.tagsList || (post.dataValues && post.dataValues.tagsList) || []
                   if postTags.length > 0
                     .d-flex.flex-wrap.gap-2.mb-3
                       each tag in postTags
                         span.badge.rounded-pill.bg-dark.text-light.border.border-secondary(style="font-weight: 500; padding: 6px 12px;") ##{tag}
+                  
+                  .mt-2.mb-3
+                    a.text-decoration-none.fw-bold.me-2.fs-5(href=`/profile/${post.userId}` style="color: inherit;") #{post.user ? post.user.username : 'Usuario'}
+                    h5.fw-bold.mb-1.mt-2 #{post.title}
+                    p.card-text.text-muted.mb-3 #{post.descriptionText}
                   p.text-muted.small.mb-0.border-bottom.pb-3 #{new Date(post.date).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
 
                   .comments-section.mt-3
@@ -154,8 +155,8 @@ block content
                 .modal-body
                   form(action=`/posts/${post.id}/report` method="POST")
                     .mb-3
-                      label.form-label.text-muted Motivo del reporte
-                      input.form-control.border-secondary.bg-transparent(type="text" name="reason" required placeholder="Ej: Contenido inapropiado, spam, etc.")
+                        label.form-label.text-muted Explicación / Motivo del reporte
+                        textarea.form-control.border-secondary.bg-transparent(name="reason" required rows="3" placeholder="Por favor, detallá por qué estás reportando esta publicación...")
                     .text-end
                       button.btn.btn-danger(type="submit") Enviar Reporte
 
@@ -171,8 +172,8 @@ block content
                     .modal-body
                       form(action=`/posts/comment/${comment.id}/report` method="POST")
                         .mb-3
-                          label.form-label.text-muted Motivo del reporte
-                          input.form-control.border-secondary.bg-transparent(type="text" name="reason" required placeholder="Ej: Lenguaje ofensivo, spam, etc.")
+                          label.form-label.text-muted Explicación / Motivo del reporte
+                          textarea.form-control.border-secondary.bg-transparent(name="reason" required rows="3" placeholder="Por favor, detallá por qué estás reportando este comentario...")
                         .text-end
                           button.btn.btn-danger(type="submit") Enviar Reporte
 
