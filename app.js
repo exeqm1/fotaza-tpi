@@ -12,8 +12,7 @@ app.use((req, res, next) => {
   const host = req.get('host');
   
   if (host && host.includes('onrender.com')) {
-
-    return res.redirect('fotaza-tpi.up.railway.app' + req.originalUrl);
+    return res.redirect(301, 'https://fotaza-tpi.up.railway.app' + req.originalUrl);
   }
   next();
 });
