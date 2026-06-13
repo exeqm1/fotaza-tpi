@@ -42,6 +42,31 @@ block content
               if (fileInput.files && fileInput.files.length > 5) {
                 e.preventDefault();
                 alert('Por favor, seleccioná un máximo de 5 fotografías por publicación.');
+                return;
+              }
+              
+              let oversize = false;
+              let invalidType = false;
+              
+              for (let i = 0; i < fileInput.files.length; i++) {
+                if (fileInput.files[i].size > 5 * 1024 * 1024) { // 5MB en bytes
+                  oversize = true;
+                }
+                if (!fileInput.files[i].type.startsWith('image/')) {
+                  invalidType = true;
+                }
+              }
+              
+              if (invalidType) {
+                e.preventDefault();
+                alert('Por favor, seleccioná únicamente archivos de formato imagen (JPG, PNG, etc.).');
+                return;
+              }
+              
+              if (oversize) {
+                e.preventDefault();
+                alert('Una o más imágenes superan el tamaño máximo permitido de 5MB. Por favor, elegí fotos más livianas.');
+                return;
               }
               
               const tagsInput = document.getElementById('tags');
