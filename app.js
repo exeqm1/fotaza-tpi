@@ -88,22 +88,17 @@ app.post('/admin/strike/:id', requireAdmin, async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-async function startServer() {
-    try {
-        await db.sequelize.authenticate();
-        
-        await db.sequelize.sync();
-        
-        console.log('Conexión a la base de datos de Laragon establecida con éxito.');
-        
-        app.listen(PORT, () => {
-            console.log(`Servidor corriendo en: http://localhost:${PORT}`);
-        });
-    } catch (error) {
-        console.error('No se pudo conectar a la base de datos:', error);
-    }
-}
+db.sequelize.authenticate()
+    .then(() => {
+        console.log('Conexión a la base de datos establecida con éxito.');
+        return db.sequelize.sync();
+    })
+    .catch(error => console.error('No se pudo conectar a la base de datos:', error));
 
-startServer();
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Servidor corriendo en el puerto ${PORT}`);
+    });
+}
 
 module.exports = app;
