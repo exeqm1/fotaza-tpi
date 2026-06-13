@@ -1,11 +1,14 @@
-# 📸 Fotaza — Trabajo Práctico Integrador (TPI)
+# Fotaza — Trabajo Práctico Integrador (TPI)
 
 Repositorio oficial de **Fotaza**. Una plataforma web de gestión y publicación de fotografías que corresponden al Trabajo Práctico Integrador de la materia Programacion Web 2 para la carrera Tecnicatura Universitaria en Desarrollo de Software
 
+## Link a la web
+
+https://fotaza-tpi-web.onrender.com/
 
 ---
 
-## 🚀 Despliegue e Infraestructura (Railway)
+## Despliegue e Infraestructura (Railway)
 
 La arquitectura de la aplicación fue migrada con éxito a **Railway**, implementando una infraestructura moderna dividida en servicios independientes:
 1. **Servidor Backend:** Node.js + Express configurado con escucha de puertos dinámicos (`process.env.PORT`) y mapeado global `0.0.0.0` 
