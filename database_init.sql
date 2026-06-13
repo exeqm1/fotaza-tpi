@@ -125,8 +125,11 @@ CREATE TABLE User_Follows (
 CREATE TABLE Notifications (
     notification_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    source_user_id INT,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
     type ENUM('COMMENT', 'RATE', 'LIKE', 'FOLLOW', 'PURCHASE') NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (source_user_id) REFERENCES Users(user_id) ON DELETE CASCADE
 );
 
 INSERT INTO Users (username, email, password, role, status, wallet_balance, strikes) VALUES 

@@ -58,19 +58,19 @@ block content
 
                 - const hasPurchased = post.purchases && post.purchases.length > 0
                 - const isLocked = post.forSale && post.price > 0 && !isOwner && !hasPurchased
-                - const images = Array.isArray(post.image) ? post.image : (post.image ? [post.image] : [])
+                - const images = post.imagesList && post.imagesList.length > 0 ? post.imagesList : (Array.isArray(post.image) ? post.image : (post.image ? [post.image] : []))
                 
                 .position-relative
                   if images.length > 1
-                    div.carousel.slide(id=`carousel-${post.id}` data-bs-ride="carousel" data-bs-theme="dark")
+                    div.carousel.slide(id=`carousel-${post.id}` data-bs-ride="false" data-bs-wrap="false" data-bs-interval="false" data-bs-theme="dark")
                       div.carousel-inner
                         each img, index in images
                           div.carousel-item(class=(index === 0 ? 'active' : ''))
                             img.card-img-top.rounded-0(src=img.filePath alt="Post image" style=`object-fit: cover; max-height: 600px; ${isLocked ? 'filter: blur(25px); pointer-events: none;' : ''}`)
-                      button.carousel-control-prev(type="button" data-bs-target=`#carousel-${post.id}` data-bs-slide="prev")
-                        span.carousel-control-prev-icon(aria-hidden="true")
-                      button.carousel-control-next(type="button" data-bs-target=`#carousel-${post.id}` data-bs-slide="next")
-                        span.carousel-control-next-icon(aria-hidden="true")
+                      button.carousel-control-prev(type="button" data-bs-target=`#carousel-${post.id}` data-bs-slide="prev" style="background-color: rgba(0,0,0,0.6); width: 40px; height: 40px; border-radius: 50%; top: 50%; transform: translateY(-50%); left: 10px; opacity: 1;")
+                        span.fw-bold.fs-5(style="color: white; line-height: 1;") &lt;
+                      button.carousel-control-next(type="button" data-bs-target=`#carousel-${post.id}` data-bs-slide="next" style="background-color: rgba(0,0,0,0.6); width: 40px; height: 40px; border-radius: 50%; top: 50%; transform: translateY(-50%); right: 10px; opacity: 1;")
+                        span.fw-bold.fs-5(style="color: white; line-height: 1;") &gt;
                   else if images.length === 1
                     img.card-img-top.rounded-0(src=images[0].filePath alt="Post image" style=`object-fit: cover; max-height: 600px; ${isLocked ? 'filter: blur(25px); pointer-events: none;' : ''}`)
                   else
@@ -88,7 +88,7 @@ block content
                     .d-flex.align-items-center.gap-4
                       
                       form(action=`/posts/rate/${post.id}` method="POST").rating-container.d-flex.flex-row-reverse.align-items-center.m-0
-                        span.ms-2.text-muted.small (#{post.image && post.image.averageRating ? post.image.averageRating.toFixed(1) : '0.0'})
+                        span.ms-2.text-muted.small (#{images.length > 0 && images[0].averageRating ? images[0].averageRating.toFixed(1) : '0.0'})
                         - const userRating = post.ratings && post.ratings.length > 0 ? post.ratings[0].value : 0
                         each star in [5, 4, 3, 2, 1]
                           button.bi.bi-heart-fill.rating-heart.fs-5.px-1(type="submit" name="rating" value=star style=`background:none; border:none; padding:0; cursor:pointer; ${star <= userRating ? 'color: #dc3545;' : ''}` title=`Dar ${star} puntos`)

@@ -27,12 +27,18 @@ html(lang="es" data-bs-theme="dark")
                 input.form-control.border-secondary.bg-transparent.shadow-none(type="search" name="q" placeholder="Buscar usuarios o publicaciones..." value=(typeof query !== 'undefined' ? query : '') style="color: inherit; box-shadow: none; outline: none;")
                 button.btn.btn-outline-secondary(type="submit" style="background-color: var(--bg-surface); border-color: var(--bs-border-color);")
                   i.bi.bi-search
-          ul.navbar-nav.ms-auto
+          ul.navbar-nav.ms-auto.gap-3
             li.nav-item
               a.nav-link(href="/") Inicio
             li.nav-item
               a.nav-link(href="/posts") Explorar
             if user
+              li.nav-item
+                a.nav-link.d-flex.align-items-center(href="/notifications" title="Notificaciones")
+                  span.position-relative
+                    i.bi.bi-bell.fs-5
+                    if notificationCount > 0
+                      span.position-absolute.top-0.start-100.translate-middle.badge.rounded-pill.bg-danger(style="font-size: 0.6rem;") #{notificationCount}
               li.nav-item
                 a.nav-link(href="/wallet") Billetera
               li.nav-item

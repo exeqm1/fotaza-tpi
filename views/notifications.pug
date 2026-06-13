@@ -14,17 +14,17 @@ block content
             each notif in notifications
               .list-group-item.list-group-item-action.d-flex.align-items-center.gap-3.py-3
                 if notif.type === 'COMMENT'
-                  i.bi.bi-chat-dots.fs-3.text-primary
-                  div Alguien comentó tu publicación.
+                  i.bi.bi-chat-dots.fs-3
+                  div #[strong #{notif.sourceUser ? notif.sourceUser.username : 'Alguien'}] comentó tu publicación.
                 else if notif.type === 'RATE'
-                  i.bi.bi-star-fill.fs-3.text-warning
-                  div Alguien calificó tu fotografía.
+                  i.bi.bi-heart-fill.fs-3
+                  div #[strong #{notif.sourceUser ? notif.sourceUser.username : 'Alguien'}] calificó tu fotografía.
                 else if notif.type === 'FOLLOW'
-                  i.bi.bi-person-plus-fill.fs-3.text-info
-                  div ¡Tenés un nuevo seguidor!
+                  i.bi.bi-person-plus-fill.fs-3
+                  div #[strong #{notif.sourceUser ? notif.sourceUser.username : 'Alguien'}] comenzó a seguirte.
                 else if notif.type === 'PURCHASE'
-                  i.bi.bi-cash-coin.fs-3.text-success
-                  div ¡Felicitaciones! Alguien compró tu fotografía.
+                  i.bi.bi-cash-coin.fs-3
+                  div ¡Felicitaciones! #[strong #{notif.sourceUser ? notif.sourceUser.username : 'Alguien'}] compró tu fotografía.
         else
           .alert.alert-light.text-center.py-5
             i.bi.bi-bell-slash.fs-1.text-muted.mb-3.d-block

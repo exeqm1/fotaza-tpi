@@ -19,7 +19,7 @@ const registerUser = async (req, res) => {
         res.redirect('/login');
     } catch (error) {
         console.error('Error al registrar usuario:', error);
-        res.status(500).send('Error interno al registrar el usuario. Es posible que el correo o usuario ya existan.');
+        res.status(500).render('error', { message: 'Error interno al registrar el usuario. Es posible que el correo o usuario ya existan.' });
     }
 };
 
@@ -34,7 +34,7 @@ const loginUser = async (req, res) => {
         });
 
         if (!user || !(await bcrypt.compare(password, user.password))) {
-            return res.status(401).send('Credenciales inválidas. Por favor, intentá nuevamente.');
+            return res.status(401).render('error', { message: 'Credenciales inválidas. Por favor, intentá nuevamente.' });
         }
 
         req.session.user = {
@@ -48,7 +48,7 @@ const loginUser = async (req, res) => {
         res.redirect('/posts');
     } catch (error) {
         console.error('Error al iniciar sesión:', error);
-        res.status(500).send('Error interno del servidor al procesar el inicio de sesión.');
+        res.status(500).render('error', { message: 'Error interno del servidor al procesar el inicio de sesión.' });
     }
 };
 

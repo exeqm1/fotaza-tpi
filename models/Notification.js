@@ -11,6 +11,17 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             field: 'user_id'
         },
+        sourceUserId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            field: 'source_user_id'
+        },
+        isRead: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+            field: 'is_read'
+        },
         type: {
             type: DataTypes.ENUM('COMMENT', 'RATE', 'LIKE', 'FOLLOW', 'PURCHASE'),
             allowNull: false
@@ -22,6 +33,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Notification.associate = function(models) {
         Notification.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+        Notification.belongsTo(models.User, { foreignKey: 'sourceUserId', as: 'sourceUser' });
     };
 
     return Notification;

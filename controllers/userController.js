@@ -16,12 +16,20 @@ const getProfile = async (req, res) => {
             ]
         });
 
-        if (!user) return res.status(404).send('Usuario no encontrado');
+        if (!user) return res.status(404).render('error', { message: 'Usuario no encontrado' });
+
+        if (user.posts && user.posts.length > 0) {
+            const postIds = user.posts.map(p => p.id);
+            const allImages = await db.Image.findAll({ where: { postId: postIds } });
+            user.posts.forEach(post => {
+                post.dataValues.imagesList = allImages.filter(img => img.postId === post.id);
+            });
+        }
 
         res.render('profile', { profileUser: user });
     } catch (error) {
         console.error('Error al cargar el perfil:', error);
-        res.status(500).send('Error interno del servidor.');
+        res.status(500).render('error', { message: 'Error interno del servidor al cargar el perfil.' });
     }
 };
 
@@ -32,7 +40,7 @@ const getEditProfile = async (req, res) => {
         res.render('edit-profile', { profileUser: user });
     } catch (error) {
         console.error('Error al cargar la edición de perfil:', error);
-        res.status(500).send('Error interno del servidor.');
+        res.status(500).render('error', { message: 'Error interno del servidor al cargar la edición de perfil.' });
     }
 };
 
@@ -42,7 +50,7 @@ const updateProfile = async (req, res) => {
         const { username, bio } = req.body;
         const user = await db.User.findByPk(userId);
 
-        if (!user) return res.status(404).send('Usuario no encontrado');
+        if (!user) return res.status(404).render('error', { message: 'Usuario no encontrado' });
 
         const updateData = { username, bio };
 
@@ -61,9 +69,9 @@ const updateProfile = async (req, res) => {
     } catch (error) {
         console.error('Error al actualizar el perfil:', error);
         if (error.name === 'SequelizeUniqueConstraintError') {
-            return res.status(400).send('El nombre de usuario ya está en uso. Por favor, elegí otro.');
+            return res.status(400).render('error', { message: 'El nombre de usuario ya está en uso. Por favor, elegí otro.' });
         }
-        res.status(500).send('Error interno al intentar actualizar el perfil.');
+        res.status(500).render('error', { message: 'Error interno al intentar actualizar el perfil.' });
     }
 };
 
@@ -72,14 +80,14 @@ const toggleFollow = async (req, res) => {
         const currentUserId = req.session.user.id;
         const targetUserId = req.params.id;
 
-        if (currentUserId.toString() === targetUserId) return res.status(400).send('No podés seguirte a vos mismo.');
+        if (currentUserId.toString() === targetUserId) return res.status(400).render('error', { message: 'No podés seguirte a vos mismo.' });
 
         const currentUser = await db.User.findByPk(currentUserId);
         const targetUser = await db.User.findByPk(targetUserId, {
             include: [{ model: db.User, as: 'followers' }]
         });
 
-        if (!targetUser) return res.status(404).send('Usuario no encontrado');
+        if (!targetUser) return res.status(404).render('error', { message: 'Usuario no encontrado' });
 
         const isFollowing = targetUser.followers.some(follower => follower.id === currentUserId);
 
@@ -88,13 +96,13 @@ const toggleFollow = async (req, res) => {
         } else {
             await targetUser.addFollower(currentUser);
             if (db.Notification) {
-                await db.Notification.create({ userId: targetUserId, type: 'FOLLOW' });
+                await db.Notification.create({ userId: targetUserId, type: 'FOLLOW', sourceUserId: currentUserId });
             }
         }
         res.redirect(`/profile/${targetUserId}`);
     } catch (error) {
         console.error('Error al seguir/dejar de seguir:', error);
-        res.status(500).send('Error interno.');
+        res.status(500).render('error', { message: 'Error interno al intentar seguir/dejar de seguir.' });
     }
 };
 
@@ -103,21 +111,21 @@ const getWallet = async (req, res) => {
         const user = await db.User.findByPk(req.session.user.id);
         res.render('wallet', { walletBalance: user.walletBalance });
     } catch (error) {
-        res.status(500).send('Error al cargar la billetera');
+        res.status(500).render('error', { message: 'Error al cargar la billetera' });
     }
 };
 
 const rechargeWallet = async (req, res) => {
     try {
         const amount = parseFloat(req.body.amount);
-        if (!amount || amount <= 0) return res.status(400).send('Monto inválido');
+        if (!amount || amount <= 0) return res.status(400).render('error', { message: 'Monto inválido' });
         
         const user = await db.User.findByPk(req.session.user.id);
         await user.update({ walletBalance: parseFloat(user.walletBalance) + amount });
         
         res.redirect('/wallet');
     } catch (error) {
-        res.status(500).send('Error al recargar saldo');
+        res.status(500).render('error', { message: 'Error al recargar saldo' });
     }
 };
 

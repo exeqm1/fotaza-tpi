@@ -1,0 +1,14 @@
+extends layouts/main.pug
+
+block content
+  .container.my-5
+    .row.justify-content-center
+      .col-md-6.text-center
+        .card.border-0.shadow-lg(style="background-color: var(--bg-surface); border-radius: 20px;")
+          .card-body.p-5
+            i.bi.bi-exclamation-triangle-fill.display-1.mb-4(style="color: #dc3545;")
+            h2.fw-bold.mb-3 ¡Oops! Algo salió mal
+            p.fs-5.text-muted.mb-4 #{message || 'Ha ocurrido un error inesperado.'}
+            a.btn.btn-primary.btn-lg.fw-bold(href="javascript:history.back()" style="border-radius: 12px;") 
+              i.bi.bi-arrow-left.me-2
+              | Volver

@@ -38,8 +38,17 @@ app.use(session({
     saveUninitialized: false
 }));
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
     res.locals.user = req.session.user || null;
+    if (req.session.user && db.Notification) {
+        try {
+            res.locals.notificationCount = await db.Notification.count({ where: { userId: req.session.user.id, isRead: false } });
+        } catch (error) {
+            res.locals.notificationCount = 0;
+        }
+    } else {
+        res.locals.notificationCount = 0;
+    }
     next();
 });
 
@@ -85,8 +94,12 @@ app.post('/admin/strike/:id', requireAdmin, async (req, res) => {
         }
         res.redirect('/admin');
     } catch (error) {
-        res.status(500).send('Error al aplicar el strike.');
+        res.status(500).render('error', { message: 'Error al aplicar el strike.' });
     }
+});
+
+app.use((req, res) => {
+    res.status(404).render('error', { message: 'La página que estás buscando no existe o fue eliminada.' });
 });
 
 const PORT = process.env.PORT || 3000;
@@ -98,6 +111,6 @@ app.listen(PORT, () => {
 db.sequelize.authenticate()
     .then(() => {
         console.log('Conexión a la base de datos establecida con éxito.');
-        return db.sequelize.sync();
+        return db.sequelize.sync({ alter: true });
     })
     .catch(error => console.error('No se pudo conectar a la base de datos:', error));

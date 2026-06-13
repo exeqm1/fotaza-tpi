@@ -55,6 +55,17 @@ const getFeed = async (req, res) => {
             order: [['date', 'DESC']]
         });
 
+        const postIds = posts.map(p => p.id);
+        if (postIds.length > 0) {
+            const allImages = await db.Image.findAll({
+                where: { postId: postIds },
+                attributes: ['postId', 'filePath', 'averageRating']
+            });
+            posts.forEach(post => {
+                post.dataValues.imagesList = allImages.filter(img => img.postId === post.id);
+            });
+        }
+
         let users = [];
         if (query) {
             users = await db.User.findAll({
@@ -66,7 +77,7 @@ const getFeed = async (req, res) => {
         res.render('posts', { posts, users, query });
     } catch (error) {
         console.error('Error al obtener el feed:', error);
-        res.status(500).send('Error interno del servidor al cargar las publicaciones.');
+        res.status(500).render('error', { message: 'Error interno del servidor al cargar las publicaciones.' });
     }
 };
 
@@ -79,7 +90,7 @@ const createPost = async (req, res) => {
         const { title, desc, price } = req.body;
         
         if (!req.files || req.files.length === 0) {
-            return res.status(400).send('Es obligatorio subir al menos una imagen.');
+            return res.status(400).render('error', { message: 'Es obligatorio subir al menos una imagen.' });
         }
 
         const newPost = await db.Post.create({
@@ -103,7 +114,7 @@ const createPost = async (req, res) => {
         res.redirect('/posts');
     } catch (error) {
         console.error('Error al crear la publicación:', error);
-        res.status(500).send('Error interno del servidor al intentar crear la publicación.');
+        res.status(500).render('error', { message: 'Error interno del servidor al intentar crear la publicación.' });
     }
 };
 
@@ -116,16 +127,16 @@ const buyPost = async (req, res) => {
             include: [{ model: db.User, as: 'user' }]
         });
 
-        if (!post) return res.status(404).send('Publicación no encontrada.');
-        if (!post.forSale || post.price <= 0) return res.status(400).send('Esta foto no está a la venta.');
-        if (post.userId === buyerId) return res.status(400).send('No podés comprar tu propia obra.');
+        if (!post) return res.status(404).render('error', { message: 'Publicación no encontrada.' });
+        if (!post.forSale || post.price <= 0) return res.status(400).render('error', { message: 'Esta foto no está a la venta.' });
+        if (post.userId === buyerId) return res.status(400).render('error', { message: 'No podés comprar tu propia obra.' });
 
         const existingPurchase = await db.Purchase.findOne({ where: { postId, userId: buyerId } });
-        if (existingPurchase) return res.status(400).send('Ya compraste esta fotografía.');
+        if (existingPurchase) return res.status(400).render('error', { message: 'Ya compraste esta fotografía.' });
 
         const buyer = await db.User.findByPk(buyerId);
         if (parseFloat(buyer.walletBalance) < parseFloat(post.price)) {
-            return res.status(400).send('Saldo insuficiente en tu billetera. Por favor, recargá primero.');
+            return res.status(400).render('error', { message: 'Saldo insuficiente en tu billetera. Por favor, recargá primero.' });
         }
 
         await db.sequelize.transaction(async (t) => {
@@ -133,14 +144,14 @@ const buyPost = async (req, res) => {
             await post.user.update({ walletBalance: parseFloat(post.user.walletBalance) + parseFloat(post.price) }, { transaction: t });
             await db.Purchase.create({ userId: buyerId, postId: postId, amount: post.price }, { transaction: t });
             if (db.Notification) {
-                await db.Notification.create({ userId: post.userId, type: 'PURCHASE' }, { transaction: t });
+                await db.Notification.create({ userId: post.userId, type: 'PURCHASE', sourceUserId: buyerId }, { transaction: t });
             }
         });
 
         res.redirect('/posts');
     } catch (error) {
         console.error('Error al procesar la compra:', error);
-        res.status(500).send('Error interno del servidor al intentar realizar el pago.');
+        res.status(500).render('error', { message: 'Error interno del servidor al intentar realizar el pago.' });
     }
 };
 
@@ -150,7 +161,7 @@ const ratePost = async (req, res) => {
         const userId = req.session.user.id;
         const value = parseInt(req.body.rating);
 
-        if (!value || value < 1 || value > 5) return res.status(400).send('Calificación inválida.');
+        if (!value || value < 1 || value > 5) return res.status(400).render('error', { message: 'Calificación inválida.' });
 
         const existingRating = await db.Rating.findOne({ where: { postId, userId } });
         if (existingRating) {
@@ -160,7 +171,7 @@ const ratePost = async (req, res) => {
             if (db.Notification) {
                 const post = await db.Post.findByPk(postId);
                 if (post && post.userId !== userId) {
-                    await db.Notification.create({ userId: post.userId, type: 'RATE' });
+                    await db.Notification.create({ userId: post.userId, type: 'RATE', sourceUserId: userId });
                 }
             }
         }
@@ -176,7 +187,7 @@ const ratePost = async (req, res) => {
         res.redirect('/posts');
     } catch (error) {
         console.error('Error al calificar:', error);
-        res.status(500).send('Error interno al intentar calificar la foto.');
+        res.status(500).render('error', { message: 'Error interno al intentar calificar la foto.' });
     }
 };
 
@@ -187,21 +198,21 @@ const addComment = async (req, res) => {
         const content = req.body.content;
 
         if (!content || content.trim() === '') {
-            return res.status(400).send('El comentario no puede estar vacío.');
+            return res.status(400).render('error', { message: 'El comentario no puede estar vacío.' });
         }
 
         const post = await db.Post.findByPk(postId);
-        if (!post) return res.status(404).send('Publicación no encontrada.');
-        if (!post.allowComments) return res.status(403).send('Los comentarios están cerrados.');
+        if (!post) return res.status(404).render('error', { message: 'Publicación no encontrada.' });
+        if (!post.allowComments) return res.status(403).render('error', { message: 'Los comentarios están cerrados.' });
 
         await db.Comment.create({ userId, postId, content: content.trim() });
         if (db.Notification && post.userId !== userId) {
-            await db.Notification.create({ userId: post.userId, type: 'COMMENT' });
+            await db.Notification.create({ userId: post.userId, type: 'COMMENT', sourceUserId: userId });
         }
         res.redirect('/posts');
     } catch (error) {
         console.error('Error al agregar comentario:', error);
-        res.status(500).send('Error interno al intentar agregar el comentario.');
+        res.status(500).render('error', { message: 'Error interno al intentar agregar el comentario.' });
     }
 };
 
@@ -212,7 +223,7 @@ const reportPost = async (req, res) => {
         const { reason } = req.body;
 
         if (!reason || reason.trim() === '') {
-            return res.status(400).send('Debes especificar un motivo.');
+            return res.status(400).render('error', { message: 'Debes especificar un motivo.' });
         }
 
         await db.Report.create({
@@ -224,7 +235,7 @@ const reportPost = async (req, res) => {
 
         res.redirect('/posts');
     } catch (error) {
-        res.status(500).send('Error interno al reportar.');
+        res.status(500).render('error', { message: 'Error interno al reportar.' });
     }
 };
 
@@ -235,7 +246,7 @@ const reportComment = async (req, res) => {
         const { reason } = req.body;
 
         if (!reason || reason.trim() === '') {
-            return res.status(400).send('Debes especificar un motivo.');
+            return res.status(400).render('error', { message: 'Debes especificar un motivo.' });
         }
 
         await db.Report.create({
@@ -247,7 +258,7 @@ const reportComment = async (req, res) => {
 
         res.redirect('/posts');
     } catch (error) {
-        res.status(500).send('Error interno al reportar.');
+        res.status(500).render('error', { message: 'Error interno al reportar.' });
     }
 };
 
@@ -257,13 +268,13 @@ const toggleComments = async (req, res) => {
         const userId = req.session.user.id;
 
         const post = await db.Post.findByPk(postId);
-        if (!post) return res.status(404).send('Publicación no encontrada.');
-        if (post.userId !== userId) return res.status(403).send('No autorizado.');
+        if (!post) return res.status(404).render('error', { message: 'Publicación no encontrada.' });
+        if (post.userId !== userId) return res.status(403).render('error', { message: 'No autorizado para realizar esta acción.' });
 
         await post.update({ allowComments: !post.allowComments });
         res.redirect('/posts');
     } catch (error) {
-        res.status(500).send('Error interno al cambiar estado de comentarios.');
+        res.status(500).render('error', { message: 'Error interno al cambiar estado de comentarios.' });
     }
 };
 
