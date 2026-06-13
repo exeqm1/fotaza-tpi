@@ -7,6 +7,17 @@ const db = require('./models');
 
 const app = express();
 
+app.use((req, res, next) => {
+
+  const host = req.get('host');
+  
+  if (host && host.includes('onrender.com')) {
+
+    return res.redirect('fotaza-tpi.up.railway.app' + req.originalUrl);
+  }
+  next();
+});
+
 const postRoutes = require('./routes/postRoutes');
 const authRoutes = require('./routes/authRoutes');
 const { requireAuth, requireAdmin } = require('./middlewares/authMiddleware');
